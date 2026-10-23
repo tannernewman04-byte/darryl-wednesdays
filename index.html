@@ -742,6 +742,11 @@ if(params.has("key")||params.has("ref")){try{if(refCode)sessionStorage.setItem("
 function savedRef(){if(refCode)return refCode;try{return sessionStorage.getItem("darryl-ref")||""}catch(e){return""}}
 
 let J={step:"email",email:"",exists:false};
+/* remember a sent code for 10 minutes, so leaving to check email doesn't reset sign-up */
+const PEND="darryl-pending",PEND_MS=10*60*1000;
+function savePending(){try{localStorage.setItem(PEND,JSON.stringify({email:J.email,exists:J.exists,name:$("nameIn").value,at:Date.now()}))}catch(e){}}
+function loadPending(){try{const o=JSON.parse(localStorage.getItem(PEND)||"null");if(o&&o.email&&Date.now()-o.at<PEND_MS)return o}catch(e){}return null}
+function clearPending(){try{localStorage.removeItem(PEND)}catch(e){}}
 const legacy=()=>!!(S&&S.needsEmail);
 function joinErr(m){$("joinErr").textContent=m||"";$("joinErr").hidden=!m}
 function renderJoin(){
@@ -754,15 +759,18 @@ function renderJoin(){
   $("joinBtn").textContent=code?(J.exists?"Sign in":legacy()?"Confirm email":"Start collecting"):"Send code";
 }
 async function showJoin(){
-  J={step:"email",email:"",exists:false};joinErr("");renderJoin();
+  const pend=loadPending();
+  J=pend?{step:"code",email:pend.email,exists:!!pend.exists}:{step:"email",email:"",exists:false};
+  if(pend){$("emailIn").value=pend.email;if(pend.name)$("nameIn").value=pend.name}
+  joinErr("");renderJoin();
   $("joinOv").hidden=false;$("invited").hidden=true;
   const ref=savedRef();
   if(ref&&!legacy()){try{const {name}=await api("invite?code="+ref);if(name){$("invited").textContent=`${name} invited you, so you start with a bonus pack.`;$("invited").hidden=false}}catch(e){}}
-  setTimeout(()=>$("emailIn").focus(),50);
+  setTimeout(()=>$(J.step==="code"?"codeIn":"emailIn").focus(),50);
 }
 async function requestCode(){
   const res=await api("code",{email:J.email});
-  J.exists=!!res.exists;J.step="code";$("codeIn").value="";
+  J.exists=!!res.exists;J.step="code";$("codeIn").value="";savePending();
   if(res.devCode)console.log("Local preview code:",res.devCode);
   renderJoin();setTimeout(()=>$("codeIn").focus(),50);
 }
@@ -779,6 +787,7 @@ $("joinForm").onsubmit=async e=>{
       const name=$("nameIn").value.trim();
       if(!J.exists&&!legacy()&&!name)throw new Error("Pick a name for the leaderboard");
       const res=await api("verify",{email:J.email,code,name,ref:savedRef()});
+      clearPending();
       if(res.token)setToken(res.token);
       try{sessionStorage.removeItem("darryl-ref")}catch(e){}
       $("joinOv").hidden=true;setState(res.state);
@@ -788,8 +797,9 @@ $("joinForm").onsubmit=async e=>{
   }catch(err){joinErr(err.message)}
   finally{$("joinBtn").disabled=false}
 };
+$("nameIn").addEventListener("input",()=>{if(J.step==="code")savePending()});
 $("resendBtn").onclick=async()=>{joinErr("");try{await requestCode();toast("New code sent")}catch(e){joinErr(e.message)}};
-$("changeEmail").onclick=()=>{J.step="email";joinErr("");renderJoin();$("emailIn").focus()};
+$("changeEmail").onclick=()=>{clearPending();J.step="email";joinErr("");renderJoin();$("emailIn").focus()};
 async function refresh(){
   try{const {state}=await api("me");$("netWarn").hidden=true;setState(state);if(state.needsEmail)showJoin()}
   catch(e){

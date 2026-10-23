@@ -1,7 +1,7 @@
 # Darryl Wednesdays
 
 Daily Darryl card packs: 1 free pack a day (3 on Wednesdays), streak and referral bonus packs,
-numbered parallels with serials that are unique across everyone, one Gold 1/1, a live feed and a leaderboard.
+numbered parallels with serials that are unique across everyone, a signed 1/1 Auto of every card, one Gold 1/1, a live feed and a leaderboard.
 
 ## Put it online (about 10 minutes)
 

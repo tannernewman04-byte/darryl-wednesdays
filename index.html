@@ -18,7 +18,7 @@
 <link rel="apple-touch-icon" href="/img/icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Mrs+Saint+Delafield&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
 <style>
 /* Layout: one-column hobby-shop counter — header, the pack as the hero, then odds; inventory is a binder grid. Single dark look on purpose (card-room lighting). */
 :root{
@@ -167,6 +167,14 @@ header .wrap{display:flex;align-items:center;gap:12px;padding:12px max(16px,env(
 .card.p-red{--frame:linear-gradient(135deg,#6e0b18,#ff5a6e 45%,#5c0712 60%,#e0344a);--chip:#ff8a98;--chipfg:#3a0008}
 .card.p-gold{--frame:linear-gradient(135deg,#6e4c0b,#ffe28a 30%,#b8861a 50%,#fff4c2 65%,#9c6f12);--chip:#ffd765;--chipfg:#2b1d00}
 .card.p-gold{filter:drop-shadow(0 0 18px rgba(255,201,74,.55))}
+.card.p-one{--frame:linear-gradient(135deg,#0b0b10,#3a2a4a 30%,#111 48%,#ff6fd8 62%,#16121b 75%,#ffd765 92%);--chip:#ff9be6;--chipfg:#2a0420}
+.card.p-one{filter:drop-shadow(0 0 16px rgba(255,111,216,.5))}
+.card.p-one .shine{opacity:.4}
+.auto{position:absolute;left:12%;right:12%;bottom:calc(var(--w)*.34);z-index:3;background:linear-gradient(#fffdf6,#f1ece0);border-radius:calc(var(--w)*.02);
+  padding:calc(var(--w)*.012) calc(var(--w)*.03) calc(var(--w)*.018);text-align:center;transform:rotate(-3deg);box-shadow:0 3px 10px rgba(0,0,0,.45);border:1px solid rgba(0,0,0,.15)}
+.auto img{display:block;width:100%;height:auto;transform:rotate(-4deg);margin:calc(var(--w)*-.01) 0 calc(var(--w)*-.025)}
+.card.p-one .serial{background:linear-gradient(135deg,#ff9be6,#ffd765);color:#2a0420}
+.auto small{display:block;font-family:var(--cond);font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:calc(var(--w)*.032);color:#7a7166;margin-top:calc(var(--w)*-.005)}
 
 /* opening overlay */
 .overlay{position:fixed;inset:0;z-index:20;background:rgba(10,8,14,.94);backdrop-filter:blur(6px);display:grid;place-items:center;
@@ -347,7 +355,7 @@ img{max-width:100%}
   </section>
 
   <section id="boardView" hidden>
-    <div class="inv-head"><div><h1>Leaderboard</h1><p>Base 1 pt · Green 5 · Blue 15 · Orange 40 · Red 100 · Gold 1,000</p></div>
+    <div class="inv-head"><div><h1>Leaderboard</h1><p>Base 1 pt · Green 5 · Blue 15 · Orange 40 · Red 100 · 1/1 Auto 500 · Gold 1,000 · Autos score like their color</p></div>
       <button class="ghost" id="boardRefresh">Refresh</button></div>
     <ol class="board" id="boardList"></ol>
   </section>
@@ -408,11 +416,16 @@ const CARDS=[
 const POOL=CARDS.filter(c=>!c.goldOnly);
 const PARS=[
   {k:"gold",label:"Gold",print:1,odds:"1 in 4,000",color:"var(--foil)"},
+  {k:"one",label:"1/1 Auto",print:1,odds:"1 in 2,000",color:"#ff6fd8"},
+  {k:"redauto",label:"Red Auto",print:5,odds:"1 in 250",color:"var(--red)",style:"red",auto:true},
   {k:"red",label:"Red",print:5,odds:"1 in 250",color:"var(--red)"},
+  {k:"orangeauto",label:"Orange Auto",print:10,odds:"1 in 120",color:"var(--orange)",style:"orange",auto:true},
   {k:"orange",label:"Orange",print:10,odds:"1 in 120",color:"var(--orange)"},
+  {k:"blueauto",label:"Blue Auto",print:25,odds:"1 in 50",color:"var(--blue)",style:"blue",auto:true},
   {k:"blue",label:"Blue",print:25,odds:"1 in 50",color:"var(--blue)"},
+  {k:"greenauto",label:"Green Auto",print:99,odds:"1 in 20",color:"var(--green)",style:"green",auto:true},
   {k:"green",label:"Green",print:99,odds:"1 in 20",color:"var(--green)"},
-  {k:"base",label:"Base",print:0,odds:"about 9 in 10",color:"#d9d4e0"}
+  {k:"base",label:"Base",print:0,odds:"about 5 in 6",color:"#d9d4e0"}
 ];
 const PAR=Object.fromEntries(PARS.map(p=>[p.k,p]));
 const RANK=Object.fromEntries(PARS.map((p,i)=>[p.k,PARS.length-i]));
@@ -444,13 +457,14 @@ function renderAll(){if(S&&S.email)$("deviceTxt").textContent=`Signed in as ${S.
 /* ---------- card markup ---------- */
 function cardHTML(pull,{facedown=false,cls=""}={}){
   const c=cardOf(pull.card),p=PAR[pull.par],numbered=pull.par!=="base";
-  return `<div class="card p-${p.k} ${numbered?"numbered":""} ${facedown?"facedown":""} ${cls}">
+  return `<div class="card p-${p.style||p.k} ${p.auto?"is-auto":""} ${numbered?"numbered":""} ${facedown?"facedown":""} ${cls}">
     <div class="inner">
       <div class="face front"><div class="frame">
         <div class="photo" style="background-image:url(${c.img});${c.pos?`background-position:${c.pos}`:""}"></div>
         <div class="topline"><span class="wm">DARRYL</span><span class="st">S01</span></div>
         <div class="plate"><span class="no">#${pad(c.n)} · ${p.label.toUpperCase()}</span><span class="nm">${esc(c.name)}</span>${numbered?"":`<span class="pl">Series 01 base</span>`}</div>
         ${numbered?`<div class="serial">${serialText(pull.par,pull.serial)}</div>`:""}
+        ${p.auto||pull.par==="one"||pull.par==="gold"?`<div class="auto"><img src="/img/sig.png" alt="Darryl Weinberg autograph"><small>Certified autograph</small></div>`:""}
         <div class="shine"></div>
       </div></div>
       <div class="face back"><div class="bk"><div class="m"></div><b>Darryl<br>Wednesdays</b><span>SERIES 01</span></div></div>
@@ -490,7 +504,7 @@ function startTimer(){
 }
 function stopTimer(){if(tick){clearInterval(tick);tick=null}}
 $("odds").innerHTML=[...PARS].reverse().map(p=>`<div class="odd" style="--pc:${p.color}">
-  <span class="nm">${p.label}</span><span class="pr">${p.print?(p.print===1?"1/1":"/"+p.print):"Base"}</span><span class="rt">${p.odds}${p.k==="gold"?" · only one exists":""}</span></div>`).join("");
+  <span class="nm">${p.label}</span><span class="pr">${p.print?(p.print===1?"1/1":"/"+p.print):"Base"}</span><span class="rt">${p.odds}${p.k==="gold"?" · Pink Room, only one exists":p.k==="one"?" · one signed copy of each card":""}</span></div>`).join("");
 
 /* ---------- opening ---------- */
 let session=null, busy=false;
@@ -552,7 +566,8 @@ function flip(){
   setTimeout(()=>{
     session.revealed.add(i);drawStage(false);
     if(pull.par==="gold")goldFlash();
-    else if(RANK[pull.par]>=RANK.blue)confetti(PAR[pull.par].color,pull.par==="blue"?60:pull.par==="orange"?110:170);
+    else if(pull.par==="one")goldFlash("1/1 AUTO","#ff6fd8");
+    else if(RANK[pull.par]>=RANK.blue)confetti(PAR[pull.par].color,/^blue/.test(pull.par)?60:/^orange/.test(pull.par)?110:170);
   },650);
 }
 function closeStage(toInv){
@@ -564,9 +579,9 @@ function closeStage(toInv){
 }
 
 /* ---------- effects ---------- */
-function goldFlash(){
-  const f=document.createElement("div");f.className="flash";f.innerHTML="<b>GOLD 1/1</b>";
-  document.body.appendChild(f);setTimeout(()=>f.remove(),2500);confetti("#ffc94a",260);
+function goldFlash(text="GOLD 1/1",color="#ffc94a"){
+  const f=document.createElement("div");f.className="flash";f.innerHTML=`<b>${text}</b>`;
+  document.body.appendChild(f);setTimeout(()=>f.remove(),2500);confetti(color,260);
 }
 function confetti(color,n){
   if(reduced())return;
@@ -659,7 +674,7 @@ async function loadFeed(){
   try{
     const {items}=await api("feed");
     el.innerHTML=items.length?items.map(x=>{const c=cardOf(x.card),p=PAR[x.par];if(!c||!p)return"";
-      return `<li class="${x.par==="gold"?"gold":""}" style="--pc:${p.color}"><span class="thumb" style="background-image:url(${c.img})"></span>
+      return `<li class="${x.par==="gold"||x.par==="one"?"gold":""}" style="--pc:${p.color}"><span class="thumb" style="background-image:url(${c.img})"></span>
         <span class="what"><b>${esc(x.name)}</b> pulled #${pad(c.n)} ${esc(c.name)}<span>${ago(x.at)}</span></span>
         <span class="tag">${p.label} ${serialText(x.par,x.serial)}</span></li>`}).join("")
       :`<li class="empty" style="display:block">No numbered pulls yet. Open a pack and be first.</li>`;
@@ -761,7 +776,7 @@ async function refresh(){
     $("netWarn").textContent="Can't reach the server right now. Check your connection and reload.";$("netWarn").hidden=false;
   }
 }
-$("foot").textContent=`Series 01 · ${POOL.length} base cards · 5 numbered parallels · one Gold 1/1`;
+$("foot").textContent=`Series 01 · ${POOL.length} base cards · 4 numbered parallels, each with a signed Auto version · ${POOL.length} signed 1/1 Autos · one Gold 1/1`;
 api("health").then(h=>{$("dbWarn").hidden=h.db!=="memory"}).catch(()=>{});
 const startView=location.hash.slice(1);
 if(token)refresh();else showJoin();

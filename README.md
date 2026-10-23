@@ -14,7 +14,10 @@ numbered parallels with serials that are unique across everyone, one Gold 1/1, a
    pick the free plan, and connect it to the project (all environments).
 4. **Redeploy:** go to **Deployments**, open the menu on the latest one and click **Redeploy**.
    The red "database isn't connected" banner on the site should be gone.
-5. Open your site, pick your name, and send your invite link to friends.
+5. **Email codes (Brevo):** sign-up needs an email code, one account per email. In Vercel open
+   **Settings → Environment Variables** and add `BREVO_API_KEY` (from Brevo → SMTP & API → API Keys)
+   and `MAIL_FROM` (a sender email you verified in Brevo). Redeploy after adding them.
+6. Open your site, sign up with your email, and send your invite link to friends.
 
 ## Changing things
 

@@ -276,6 +276,8 @@ img{max-width:100%}
 .join input:focus{outline:2px solid var(--foil);outline-offset:1px}
 .join .cta{justify-self:stretch}
 .join .err{color:#ff8a98}
+.jstep{display:grid;gap:8px}
+.linkbtn{color:var(--muted);text-decoration:underline;font-size:14px;padding:2px 4px}
 .medal.big{justify-self:center;width:96px;aspect-ratio:1;border-radius:50%;background:url(/img/d2.jpg) center 22%/cover;border:4px solid var(--foil)}
 </style>
 </head>
@@ -358,22 +360,32 @@ img{max-width:100%}
     <div class="grid" id="grid"></div>
     <div class="device">
       <h2>Use your binder on another device</h2>
-      <p>Open this private login link on your other phone or computer. Anyone with it can open your packs, so don't post it.</p>
-      <div class="row left"><button class="ghost" id="loginCopy">Copy my login link</button></div>
+      <p id="deviceTxt">On your other phone or computer, open the site and sign in with the same email.</p>
     </div>
   </section>
   <footer id="foot"></footer>
 </main>
 
 <div class="overlay" id="joinOv" hidden>
-  <form class="join" id="joinForm" autocomplete="off">
+  <form class="join" id="joinForm" autocomplete="off" novalidate>
     <div class="medal big" aria-hidden="true"></div>
     <h1>Darryl Wednesdays</h1>
     <p class="invited" id="invited" hidden></p>
-    <p>Open a free pack of Darryl cards every day, and three on Wednesdays. Pick the name that shows on the feed and leaderboard.</p>
-    <label for="nameIn">Your name</label>
-    <input id="nameIn" maxlength="20" placeholder="e.g. Tanner" required>
-    <button class="cta" id="joinBtn" type="submit">Start collecting</button>
+    <p id="joinIntro"></p>
+    <div class="jstep" id="stepEmail">
+      <label for="emailIn">Email</label>
+      <input id="emailIn" type="email" autocomplete="email" maxlength="120" placeholder="you@example.com">
+    </div>
+    <div class="jstep" id="stepCode" hidden>
+      <label for="codeIn">6-digit code</label>
+      <input id="codeIn" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456">
+      <div class="jstep" id="nameWrap">
+        <label for="nameIn">Your name</label>
+        <input id="nameIn" maxlength="20" placeholder="e.g. Tanner">
+      </div>
+    </div>
+    <button class="cta" id="joinBtn" type="submit">Send code</button>
+    <div class="row" id="codeLinks" hidden><button type="button" class="linkbtn" id="resendBtn">Resend code</button><button type="button" class="linkbtn" id="changeEmail">Use a different email</button></div>
     <p class="err" id="joinErr" hidden></p>
   </form>
 </div>
@@ -427,7 +439,7 @@ async function api(path,body){
 /* ---------- state ---------- */
 let S=null, resetAt=0, tick=null, view="packs";
 function setState(s){S=s;resetAt=Date.now()+s.secsLeft*1000;renderAll()}
-function renderAll(){renderPacks();$("invCount").textContent=S?S.inv.length:0;if(view==="inv")renderInv()}
+function renderAll(){if(S&&S.email)$("deviceTxt").textContent=`Signed in as ${S.email}. On your other phone or computer, open the site and sign in with the same email.`;renderPacks();$("invCount").textContent=S?S.inv.length:0;if(view==="inv")renderInv()}
 
 /* ---------- card markup ---------- */
 function cardHTML(pull,{facedown=false,cls=""}={}){
@@ -685,7 +697,6 @@ async function copyText(text,okMsg,input){
 }
 $("copyBtn").onclick=()=>copyText($("refLink").value,"Invite link copied",$("refLink"));
 if(navigator.share){$("shareBtn").hidden=false;$("shareBtn").onclick=()=>navigator.share({title:"Darryl Wednesdays",text:"Open free Darryl packs with me. Use my link and you start with a bonus pack.",url:$("refLink").value}).catch(()=>{})}
-$("loginCopy").onclick=()=>copyText(`${location.origin}/?key=${token}`,"Login link copied. Keep it private.");
 
 /* ---------- join & boot ---------- */
 const params=new URLSearchParams(location.search);
@@ -694,27 +705,57 @@ if(params.get("key")&&/^[a-f0-9]{48}$/.test(params.get("key")))setToken(params.g
 if(params.has("key")||params.has("ref")){try{if(refCode)sessionStorage.setItem("darryl-ref",refCode)}catch(e){}history.replaceState(null,"",location.pathname+location.hash)}
 function savedRef(){if(refCode)return refCode;try{return sessionStorage.getItem("darryl-ref")||""}catch(e){return""}}
 
+let J={step:"email",email:"",exists:false};
+const legacy=()=>!!(S&&S.needsEmail);
+function joinErr(m){$("joinErr").textContent=m||"";$("joinErr").hidden=!m}
+function renderJoin(){
+  const code=J.step==="code";
+  $("stepEmail").hidden=code;$("stepCode").hidden=!code;$("codeLinks").hidden=!code;
+  $("nameWrap").hidden=J.exists||legacy();
+  $("joinIntro").textContent=code?`We emailed a 6-digit code to ${J.email}. It can take a minute, so check your spam folder too.`
+    :legacy()?"Add your email to keep opening packs. Your binder, points and streak stay the same. One account per email."
+    :"Open a free pack of Darryl cards every day, and three on Wednesdays. Sign up or sign in with your email. One account per person.";
+  $("joinBtn").textContent=code?(J.exists?"Sign in":legacy()?"Confirm email":"Start collecting"):"Send code";
+}
 async function showJoin(){
-  $("joinOv").hidden=false;
+  J={step:"email",email:"",exists:false};joinErr("");renderJoin();
+  $("joinOv").hidden=false;$("invited").hidden=true;
   const ref=savedRef();
-  if(ref){try{const {name}=await api("invite?code="+ref);if(name){$("invited").textContent=`${name} invited you, so you start with a bonus pack.`;$("invited").hidden=false}}catch(e){}}
-  setTimeout(()=>$("nameIn").focus(),50);
+  if(ref&&!legacy()){try{const {name}=await api("invite?code="+ref);if(name){$("invited").textContent=`${name} invited you, so you start with a bonus pack.`;$("invited").hidden=false}}catch(e){}}
+  setTimeout(()=>$("emailIn").focus(),50);
+}
+async function requestCode(){
+  const res=await api("code",{email:J.email});
+  J.exists=!!res.exists;J.step="code";$("codeIn").value="";
+  if(res.devCode)console.log("Local preview code:",res.devCode);
+  renderJoin();setTimeout(()=>$("codeIn").focus(),50);
 }
 $("joinForm").onsubmit=async e=>{
-  e.preventDefault();
-  const name=$("nameIn").value.trim();
-  if(!name){$("joinErr").textContent="Pick a name for the leaderboard";$("joinErr").hidden=false;return}
-  $("joinBtn").disabled=true;$("joinErr").hidden=true;
+  e.preventDefault();joinErr("");$("joinBtn").disabled=true;
   try{
-    const res=await api("join",{name,ref:savedRef()});
-    setToken(res.token);try{sessionStorage.removeItem("darryl-ref")}catch(e){}
-    $("joinOv").hidden=true;setState(res.state);
-    if(res.invitedBy)toast(`Bonus pack from ${res.invitedBy} added`);
-  }catch(err){$("joinErr").textContent=err.message;$("joinErr").hidden=false}
+    if(J.step==="email"){
+      J.email=$("emailIn").value.trim();
+      if(!/^\S+@\S+\.\S+$/.test(J.email))throw new Error("Enter your email address");
+      await requestCode();
+    }else{
+      const code=$("codeIn").value.replace(/\D/g,"");
+      if(code.length!==6)throw new Error("Enter the 6-digit code from the email");
+      const name=$("nameIn").value.trim();
+      if(!J.exists&&!legacy()&&!name)throw new Error("Pick a name for the leaderboard");
+      const res=await api("verify",{email:J.email,code,name,ref:savedRef()});
+      if(res.token)setToken(res.token);
+      try{sessionStorage.removeItem("darryl-ref")}catch(e){}
+      $("joinOv").hidden=true;setState(res.state);
+      if(res.invitedBy)toast(`Bonus pack from ${res.invitedBy} added`);
+      else if(J.exists)toast(`Signed in as ${res.state.name}`);
+    }
+  }catch(err){joinErr(err.message)}
   finally{$("joinBtn").disabled=false}
 };
+$("resendBtn").onclick=async()=>{joinErr("");try{await requestCode();toast("New code sent")}catch(e){joinErr(e.message)}};
+$("changeEmail").onclick=()=>{J.step="email";joinErr("");renderJoin();$("emailIn").focus()};
 async function refresh(){
-  try{const {state}=await api("me");$("netWarn").hidden=true;setState(state)}
+  try{const {state}=await api("me");$("netWarn").hidden=true;setState(state);if(state.needsEmail)showJoin()}
   catch(e){
     if(e.status===401){setToken(null);showJoin();return}
     $("netWarn").textContent="Can't reach the server right now. Check your connection and reload.";$("netWarn").hidden=false;

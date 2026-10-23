@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Darryl Wednesdays</title>
+<meta name="description" content="Open your free daily Darryl pack. Three on Wednesdays.">
+<meta property="og:title" content="Darryl Wednesdays">
+<meta property="og:description" content="Open your free daily Darryl pack. Three on Wednesdays.">
+<meta property="og:image" content="/img/og.jpg">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#110e17">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Darryl">
+<link rel="icon" type="image/png" href="/img/icon.png">
+<link rel="apple-touch-icon" href="/img/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: one-column hobby-shop counter — header, the pack as the hero, then odds; inventory is a binder grid. Single dark look on purpose (card-room lighting). */
+:root{
+  --bg:#110e17; --bg2:#19141f; --panel:#1f1928; --line:#342b40;
+  --fg:#f4efe7; --muted:#a99fb6; --dim:#6f6680;
+  --foil:#ffc94a; --foil2:#f39b2a; --ink:#120f16;
+  --green:#2fb36b; --blue:#3a7bea; --orange:#f2802a; --red:#e0344a;
+  --display:"Anton","Impact","Arial Narrow",sans-serif;
+  --cond:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  background-image:radial-gradient(1200px 600px at 50% -200px,#2a1f38 0%,transparent 70%);background-repeat:no-repeat;}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible,.tile:focus-visible{outline:2px solid var(--foil);outline-offset:3px}
+.wrap{max-width:980px;margin:0 auto}
+
+/* header */
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px)))}
+header .wrap{display:flex;align-items:center;gap:12px;padding:12px max(16px,env(safe-area-inset-right,0px))}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto;min-width:0}
+.brand .av{width:34px;height:34px;border-radius:50%;background:url(/img/d2.jpg) center 25%/cover;border:2px solid var(--foil);flex:none}
+.brand b{font-family:var(--display);font-weight:400;font-size:20px;letter-spacing:.02em;text-transform:uppercase;white-space:nowrap}
+@media (max-width:470px){.brand .wd{display:none}.nav button{padding:6px 11px}}
+.nav{display:flex;gap:4px;background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:3px}
+.nav button{font-family:var(--cond);font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:14px;padding:6px 14px;border-radius:999px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.nav button[aria-current="true"]{background:var(--fg);color:var(--ink)}
+.nav .count{font-family:var(--body);font-size:12px;background:var(--line);color:var(--fg);border-radius:999px;padding:0 7px;min-width:20px;text-align:center}
+.nav button[aria-current="true"] .count{background:var(--ink);color:var(--fg)}
+
+/* packs view */
+.banner{margin-top:20px;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;text-align:center;font-family:var(--cond);font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:14px;color:var(--muted)}
+.banner .wed{color:var(--ink);background:var(--foil);padding:3px 10px;border-radius:4px}
+.hero{display:grid;justify-items:center;gap:18px;padding:28px 0 8px}
+.pack-wrap{position:relative;perspective:900px}
+.left-badge{position:absolute;top:-10px;right:-14px;z-index:3;background:var(--red);color:#fff;font-family:var(--display);font-size:20px;min-width:44px;height:44px;border-radius:50%;display:grid;place-items:center;border:3px solid var(--bg);transform:rotate(8deg)}
+.pack{--pw:min(250px,62vw);width:var(--pw);aspect-ratio:5/8;position:relative;border-radius:10px 10px 12px 12px;transform-style:preserve-3d;transition:transform .35s cubic-bezier(.2,.8,.2,1);cursor:pointer;filter:drop-shadow(0 24px 30px rgba(0,0,0,.55))}
+.pack:hover{transform:rotateY(-8deg) rotateX(4deg) translateY(-4px)}
+.pack[aria-disabled="true"]{cursor:default;filter:grayscale(.85) brightness(.6) drop-shadow(0 20px 26px rgba(0,0,0,.5))}
+.pack[aria-disabled="true"]:hover{transform:none}
+.pack .body{position:absolute;inset:0;border-radius:inherit;overflow:hidden;
+  background:linear-gradient(115deg,#5d2a8a 0%,#2d1546 30%,#b8335a 58%,#ffb547 100%);}
+.pack .body::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,0) 0 14px,rgba(255,255,255,.07) 14px 15px);mix-blend-mode:overlay}
+.pack .body::after{content:"";position:absolute;inset:-40%;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.35) 50%,transparent 60%);animation:sheen 4.5s ease-in-out infinite}
+@keyframes sheen{0%,60%{transform:translateX(-60%)}100%{transform:translateX(60%)}}
+.crimp{position:absolute;left:0;right:0;height:16px;background:linear-gradient(#e7e1ea,#a99fb6);z-index:2;
+  -webkit-mask:linear-gradient(transparent 0) , conic-gradient(from -45deg at bottom,#000 90deg,transparent 0) 0 0/12px 100%;
+  mask:conic-gradient(from -45deg at bottom,#000 90deg,transparent 0) 0 0/12px 100%}
+.crimp.top{top:-6px;transform:scaleY(-1)}
+.crimp.bot{bottom:-6px}
+.pack .tear{position:absolute;left:0;right:0;top:0;height:16%;z-index:2;border-bottom:2px dashed rgba(255,255,255,.35);transform-origin:12% 100%}
+.pack .content{position:absolute;inset:0;display:grid;grid-template-rows:auto 1fr auto;justify-items:center;padding:22% 10% 9%;text-align:center;z-index:1}
+.pack .series{font-family:var(--cond);font-weight:700;letter-spacing:.2em;font-size:11px;color:rgba(255,255,255,.85)}
+.pack .medal{align-self:center;width:62%;aspect-ratio:1;border-radius:50%;background:url(/img/d2.jpg) center 22%/cover;border:4px solid var(--foil);box-shadow:0 0 0 3px rgba(0,0,0,.25),0 10px 24px rgba(0,0,0,.4)}
+.pack .title{font-family:var(--display);font-size:clamp(22px,6.6vw,31px);line-height:.95;text-transform:uppercase;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.35)}
+.pack .title small{display:block;font-size:.55em;color:var(--foil);letter-spacing:.04em}
+.pack .s01{position:absolute;bottom:12px;right:12px;font-family:var(--display);font-size:13px;background:rgba(0,0,0,.35);padding:1px 7px;border-radius:3px;z-index:2}
+.pack.tearing .tear{animation:rip .55s cubic-bezier(.5,0,.75,0) forwards;background:inherit}
+@keyframes rip{to{transform:translate(40px,-80px) rotate(-28deg);opacity:0}}
+.pack.dropping{animation:drop .5s .45s cubic-bezier(.5,0,1,.5) forwards}
+@keyframes drop{to{transform:translateY(120%) rotate(6deg);opacity:0}}
+
+.cta{font-family:var(--cond);font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:18px;background:var(--foil);color:var(--ink);padding:14px 34px;border-radius:999px;box-shadow:0 6px 0 var(--foil2);transition:transform .1s,box-shadow .1s}
+.cta:active{transform:translateY(4px);box-shadow:0 2px 0 var(--foil2)}
+.cta[disabled]{background:var(--line);color:var(--muted);box-shadow:0 6px 0 #251e2f;cursor:default}
+.ghost{font-family:var(--cond);font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:15px;padding:11px 22px;border-radius:999px;border:1px solid var(--line);color:var(--fg)}
+.ghost:hover{border-color:var(--muted)}
+.sub{color:var(--muted);font-size:14px;text-align:center}
+.timer{font-family:var(--display);font-size:28px;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+
+.strip{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin:18px 0 6px}
+.streak{display:flex;gap:6px;align-items:center;font-family:var(--cond);font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:13px;color:var(--muted)}
+.streak i{width:22px;height:8px;border-radius:2px;background:var(--line);display:block}
+.streak i.on{background:var(--foil)}
+
+.section-h{font-family:var(--cond);font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:13px;color:var(--muted);margin:34px 0 12px;display:flex;align-items:center;gap:10px}
+.section-h::after{content:"";flex:1;height:1px;background:var(--line)}
+.odds{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:40px}
+.odd{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:2px;position:relative;overflow:hidden}
+.odd::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--pc)}
+.odd .nm{font-family:var(--cond);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:15px}
+.odd .pr{font-family:var(--display);font-size:22px;line-height:1.1}
+.odd .rt{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+
+/* trading card */
+.card{--w:220px;width:var(--w);aspect-ratio:5/7;position:relative;perspective:1000px;flex:none;max-width:100%}
+.card .inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+.card.facedown .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:calc(var(--w)*.05);overflow:hidden}
+.front{transform:rotateY(0)}
+.back{transform:rotateY(180deg);background:radial-gradient(circle at 50% 45%,#3b1d57,#160f1f 70%);border:calc(var(--w)*.035) solid #e8e2ec;display:grid;place-items:center;text-align:center}
+.back::before{content:"";position:absolute;inset:0;background:repeating-conic-gradient(from 0deg at 50% 45%,rgba(255,201,74,.08) 0 6deg,transparent 6deg 12deg)}
+.back .bk{position:relative;display:grid;gap:calc(var(--w)*.03);justify-items:center}
+.back .bk .m{width:calc(var(--w)*.42);aspect-ratio:1;border-radius:50%;background:url(/img/d2.jpg) center 22%/cover;border:calc(var(--w)*.02) solid var(--foil);filter:grayscale(.2)}
+.back .bk b{font-family:var(--display);font-weight:400;font-size:calc(var(--w)*.1);line-height:.95;text-transform:uppercase;color:var(--fg)}
+.back .bk span{font-family:var(--cond);font-weight:700;letter-spacing:.2em;font-size:calc(var(--w)*.045);color:var(--foil)}
+.frame{position:absolute;inset:0;padding:calc(var(--w)*.045);background:var(--frame)}
+.photo{position:absolute;inset:calc(var(--w)*.045);border-radius:calc(var(--w)*.025);background-size:cover;background-position:center 30%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.4)}
+.photo::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(to bottom,rgba(0,0,0,.5),transparent 22%,transparent 62%,rgba(0,0,0,.85))}
+.topline{position:absolute;left:calc(var(--w)*.08);right:calc(var(--w)*.08);top:calc(var(--w)*.07);display:flex;justify-content:space-between;align-items:center;z-index:2}
+.topline .wm{font-family:var(--display);font-size:calc(var(--w)*.085);letter-spacing:.03em;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.4)}
+.topline .st{font-family:var(--cond);font-weight:700;font-size:calc(var(--w)*.05);letter-spacing:.1em;background:var(--chip);color:var(--chipfg);padding:0 calc(var(--w)*.025);border-radius:3px}
+.plate{position:absolute;left:calc(var(--w)*.08);right:calc(var(--w)*.08);bottom:calc(var(--w)*.075);z-index:2;display:grid;gap:0}
+.plate .no{font-family:var(--cond);font-weight:700;letter-spacing:.14em;font-size:calc(var(--w)*.05);color:var(--chip)}
+.plate .nm{font-family:var(--display);font-size:calc(var(--w)*.105);line-height:1;text-transform:uppercase;color:#fff;overflow-wrap:anywhere}
+.plate .pl{font-family:var(--cond);font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:calc(var(--w)*.045);color:rgba(255,255,255,.75)}
+.card.numbered .topline .st{display:none}
+.serial{position:absolute;right:calc(var(--w)*.07);top:calc(var(--w)*.065);z-index:3;font-family:var(--display);font-size:calc(var(--w)*.075);line-height:1;background:var(--frame);color:var(--chipfg);padding:calc(var(--w)*.02) calc(var(--w)*.03);border-radius:calc(var(--w)*.015);box-shadow:0 2px 6px rgba(0,0,0,.4);font-variant-numeric:tabular-nums}
+.shine{position:absolute;inset:0;z-index:4;pointer-events:none;mix-blend-mode:color-dodge;opacity:0;background-size:250% 100%!important;
+  background:linear-gradient(115deg,transparent 20%,rgba(255,255,255,.5) var(--sx,45%),transparent 70%)}
+.card.numbered .shine{opacity:.35}
+.card.p-gold .shine{opacity:.45;background:linear-gradient(115deg,transparent 30%,rgba(255,244,200,.8) var(--sx,45%),transparent 60%)}
+@media (prefers-reduced-motion:no-preference){
+  .card.numbered .shine,.card.p-gold .shine{animation:glint 3.2s ease-in-out infinite}
+}
+@keyframes glint{0%,100%{--sx:20%;background-position:-120px 0}50%{background-position:120px 0}}
+.card.p-base{--frame:linear-gradient(135deg,#f2f0f5,#a8a2b4 40%,#fbfafc 55%,#918aa0);--chip:#e9e6ee;--chipfg:#16121b}
+.card.p-green{--frame:linear-gradient(135deg,#0f5a32,#38c97a 45%,#0e4d2b 60%,#2fb36b);--chip:#5fe39a;--chipfg:#062a16}
+.card.p-blue{--frame:linear-gradient(135deg,#123a86,#5d9bff 45%,#0f2f6e 60%,#3a7bea);--chip:#8cb8ff;--chipfg:#071a3d}
+.card.p-orange{--frame:linear-gradient(135deg,#8a3a06,#ffa552 45%,#7a3005 60%,#f2802a);--chip:#ffb36b;--chipfg:#3a1600}
+.card.p-red{--frame:linear-gradient(135deg,#6e0b18,#ff5a6e 45%,#5c0712 60%,#e0344a);--chip:#ff8a98;--chipfg:#3a0008}
+.card.p-gold{--frame:linear-gradient(135deg,#6e4c0b,#ffe28a 30%,#b8861a 50%,#fff4c2 65%,#9c6f12);--chip:#ffd765;--chipfg:#2b1d00}
+.card.p-gold{filter:drop-shadow(0 0 18px rgba(255,201,74,.55))}
+
+/* opening overlay */
+.overlay{position:fixed;inset:0;z-index:20;background:rgba(10,8,14,.94);backdrop-filter:blur(6px);display:grid;place-items:center;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));overflow-y:auto}
+.stage{display:grid;justify-items:center;gap:16px;width:100%;max-width:520px;text-align:center}
+.stage .card{--w:min(280px,72vw)}
+.stage .card.appear{animation:rise .55s cubic-bezier(.2,.8,.2,1)}
+@keyframes rise{from{transform:translateY(60px) scale(.9);opacity:0}}
+.pager{display:flex;align-items:center;gap:14px;font-family:var(--cond);font-weight:600;letter-spacing:.1em;color:var(--muted);font-variant-numeric:tabular-nums}
+.pager button{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);font-size:18px;line-height:1}
+.pager button[disabled]{opacity:.3;cursor:default}
+.reveal{min-height:92px;display:grid;gap:2px;justify-items:center}
+.reveal .tier{font-family:var(--cond);font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:14px;padding:2px 12px;border-radius:999px;background:var(--pc);color:var(--ink)}
+.reveal .big{font-family:var(--display);font-size:30px;line-height:1.1;text-transform:uppercase}
+.reveal .meta{color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums}
+.hint{color:var(--muted);font-size:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+
+.flash{position:fixed;inset:0;z-index:30;pointer-events:none;display:grid;place-items:center;background:radial-gradient(circle,rgba(255,215,101,.55),rgba(255,160,40,.15) 45%,transparent 70%);animation:fl 2.4s ease-out forwards}
+.flash b{font-family:var(--display);font-size:clamp(48px,16vw,110px);color:var(--foil);text-shadow:0 0 30px rgba(255,201,74,.9),0 4px 0 #7a5208;transform:rotate(-6deg)}
+@keyframes fl{0%{opacity:0}10%{opacity:1}75%{opacity:1}100%{opacity:0}}
+canvas#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:25}
+
+/* inventory */
+.inv-head{display:flex;align-items:end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:26px 0 18px}
+.inv-head h1{font-family:var(--display);font-weight:400;font-size:clamp(34px,8vw,48px);line-height:1;text-transform:uppercase;margin:0}
+.inv-head p{margin:4px 0 0;color:var(--muted)}
+.stats{display:flex;gap:18px;font-family:var(--cond);text-transform:uppercase;letter-spacing:.08em;font-size:13px;color:var(--muted)}
+.stats b{display:block;font-family:var(--display);font-weight:400;font-size:26px;letter-spacing:.02em;color:var(--fg);font-variant-numeric:tabular-nums}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px 14px;margin-bottom:48px}
+.tile{display:grid;gap:8px;justify-items:center;text-align:center;border-radius:12px;padding:6px 0}
+.tile .card{--w:100%;width:100%;max-width:200px}
+.tile.locked .card{opacity:.4;filter:grayscale(1)}
+.tile .cap{font-family:var(--cond);font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:14px;line-height:1.2}
+.tile .cap small{display:block;color:var(--muted);font-weight:500;letter-spacing:.04em;font-size:12px}
+.dots{display:flex;gap:5px}
+.dots i{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--dc);display:block}
+.dots i.on{background:var(--dc)}
+.lockq{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-size:42px;color:var(--fg);z-index:5}
+
+.modal{position:fixed;inset:0;z-index:20;background:rgba(10,8,14,.94);backdrop-filter:blur(6px);overflow-y:auto;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:grid;place-items:center}
+.modal .close{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:calc(14px + env(safe-area-inset-right,0px));width:42px;height:42px;border-radius:50%;border:1px solid var(--line);font-size:20px;background:var(--bg2);z-index:2}
+.spin{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.spin:active{cursor:grabbing}
+.spin .inner{transition:none}
+.spin.settle .inner{transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.versions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:460px}
+.versions button{font-family:var(--cond);font-weight:600;letter-spacing:.06em;font-size:14px;padding:5px 12px;border-radius:999px;border:1.5px solid var(--pc);font-variant-numeric:tabular-nums}
+.versions button[aria-pressed="true"]{background:var(--pc);color:var(--ink)}
+
+.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;background:var(--fg);color:var(--ink);font-weight:600;padding:10px 18px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.5);max-width:calc(100vw - 32px);text-align:center}
+footer{color:var(--dim);font-size:13px;text-align:center;padding:0 0 30px}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* site-only additions */
+html,body{margin:0}
+body{padding-bottom:env(safe-area-inset-bottom,0px)}
+img{max-width:100%}
+@media (max-width:560px){
+  header .wrap{flex-wrap:wrap;row-gap:8px}
+  .brand{flex:1 1 auto}
+  .nav{order:3;width:100%;justify-content:space-between}
+  .nav button{flex:1;justify-content:center;padding:6px 6px;font-size:13px}
+  .brand .wd{display:inline}
+}
+.warn{margin-top:14px;background:#3a1620;border:1px solid var(--red);color:var(--fg);padding:10px 14px;border-radius:10px;font-size:14px}
+.goldline{text-align:center;font-family:var(--cond);font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:13px;color:var(--muted);margin-top:6px}
+.goldline b{color:var(--foil);font-weight:700}
+.refer{margin:28px 0 0;display:grid;grid-template-columns:1.2fr 1fr;gap:18px;align-items:center;background:linear-gradient(120deg,#2a1c3a,#1f1928 60%);border:1px solid var(--line);border-radius:14px;padding:20px}
+@media (max-width:640px){.refer{grid-template-columns:1fr}}
+.refer h2,.device h2{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:26px;line-height:1;margin:0 0 8px}
+.refer p,.device p{margin:0;color:var(--muted);max-width:52ch}
+.refprog{margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-family:var(--cond);font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:13px;color:var(--muted)}
+.refprog i{width:26px;height:26px;border-radius:50%;border:2px dashed var(--line);display:grid;place-items:center;font-style:normal;font-size:12px;color:var(--dim)}
+.refprog i.on{border:2px solid var(--foil);background:var(--foil);color:var(--ink)}
+.refer-act{display:grid;gap:10px;min-width:0}
+.refer-act input{width:100%;min-width:0;background:var(--bg);border:1px solid var(--line);color:var(--fg);border-radius:10px;padding:11px 12px;font:500 14px var(--body)}
+.row.left{justify-content:flex-start}
+.cta.small{font-size:15px;padding:10px 22px;box-shadow:0 4px 0 var(--foil2)}
+.device{border-top:1px solid var(--line);padding:22px 0 10px;margin-bottom:30px}
+.device .row{margin-top:12px}
+
+.feed,.board{list-style:none;margin:0 0 48px;padding:0;display:grid;gap:8px}
+.feed li,.board li{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.feed li.gold{border-color:var(--foil);background:linear-gradient(120deg,#3a2c0c,var(--panel) 70%)}
+.thumb{width:44px;aspect-ratio:3/4;border-radius:5px;background-size:cover;background-position:center 30%;border:3px solid var(--pc)}
+.feed .what{min-width:0}
+.feed .what b{font-weight:600}
+.feed .what span{display:block;color:var(--muted);font-size:13px}
+.tag{font-family:var(--cond);font-weight:700;letter-spacing:.06em;font-size:13px;padding:2px 10px;border-radius:999px;background:var(--pc);color:var(--ink);white-space:nowrap;font-variant-numeric:tabular-nums}
+.board li{grid-template-columns:36px 1fr auto}
+.board .rk{font-family:var(--display);font-size:22px;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}
+.board li:nth-child(1) .rk{color:var(--foil)}
+.board li.you{border-color:var(--foil)}
+.board .who{min-width:0;overflow-wrap:anywhere}
+.board .who span{display:block;color:var(--muted);font-size:13px}
+.board .pts{font-family:var(--display);font-size:22px;font-variant-numeric:tabular-nums}
+.empty{color:var(--muted);text-align:center;padding:30px 0}
+
+.join{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px 22px;width:100%;max-width:400px;display:grid;gap:12px;text-align:left}
+.join h1{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:34px;line-height:1;margin:0;text-align:center}
+.join p{margin:0;color:var(--muted)}
+.join .invited{color:var(--ink);background:var(--foil);padding:8px 12px;border-radius:10px;font-weight:600}
+.join label{font-family:var(--cond);font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:13px;color:var(--muted)}
+.join input{background:var(--bg);border:1px solid var(--line);color:var(--fg);border-radius:10px;padding:12px;font:500 16px var(--body)}
+.join input:focus{outline:2px solid var(--foil);outline-offset:1px}
+.join .cta{justify-self:stretch}
+.join .err{color:#ff8a98}
+.medal.big{justify-self:center;width:96px;aspect-ratio:1;border-radius:50%;background:url(/img/d2.jpg) center 22%/cover;border:4px solid var(--foil)}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="brand"><span class="av" aria-hidden="true"></span><b>Darryl<span class="wd"> Wednesdays</span></b></div>
+  <nav class="nav" aria-label="Sections">
+    <button data-view="packs" aria-current="true">Packs</button>
+    <button data-view="feed" aria-current="false">Feed</button>
+    <button data-view="board" aria-current="false">Ranks</button>
+    <button data-view="inv" aria-current="false">Binder <span class="count" id="invCount">0</span></button>
+  </nav>
+</div></header>
+
+<main class="wrap">
+  <div class="warn" id="dbWarn" hidden>The database isn't connected yet, so pulls reset whenever the site restarts. Finish step 4 of the setup guide.</div>
+  <div class="warn" id="netWarn" hidden></div>
+
+  <section id="packsView">
+    <div class="banner" id="banner"></div>
+    <div class="hero">
+      <div class="pack-wrap">
+        <span class="left-badge" id="leftBadge" hidden>×1</span>
+        <div class="pack" id="pack" role="button" tabindex="0" aria-label="Open a Darryl pack" aria-disabled="true">
+          <div class="crimp top"></div>
+          <div class="body"></div>
+          <div class="tear"></div>
+          <div class="content">
+            <div class="series">SERIES 01 · DAILY PACK</div>
+            <div class="medal"></div>
+            <div class="title"><small>3 cards</small>Darryl<br>Wednesdays</div>
+          </div>
+          <span class="s01">S01</span>
+          <div class="crimp bot"></div>
+        </div>
+      </div>
+      <button class="cta" id="openBtn" disabled>Loading…</button>
+      <div class="sub" id="sub"></div>
+    </div>
+    <div class="strip"><div class="streak" id="streak"></div></div>
+
+    <div class="goldline" id="goldLine"></div>
+
+    <div class="refer" id="refer">
+      <div class="refer-copy">
+        <h2>Want more free packs?</h2>
+        <p>Send your link to friends. Each friend who joins with it starts with a bonus pack, and every 3 friends who join earn you one too.</p>
+        <div class="refprog" id="refProg"></div>
+      </div>
+      <div class="refer-act">
+        <input id="refLink" readonly aria-label="Your invite link" value="">
+        <div class="row">
+          <button class="cta small" id="copyBtn">Copy link</button>
+          <button class="ghost" id="shareBtn" hidden>Share</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-h">Pull odds, per card</div>
+    <div class="odds" id="odds"></div>
+  </section>
+
+  <section id="feedView" hidden>
+    <div class="inv-head"><div><h1>Feed</h1><p>Every numbered card pulled, newest first.</p></div>
+      <button class="ghost" id="feedRefresh">Refresh</button></div>
+    <ul class="feed" id="feedList"></ul>
+  </section>
+
+  <section id="boardView" hidden>
+    <div class="inv-head"><div><h1>Leaderboard</h1><p>Base 1 pt · Green 5 · Blue 15 · Orange 40 · Red 100 · Gold 1,000</p></div>
+      <button class="ghost" id="boardRefresh">Refresh</button></div>
+    <ol class="board" id="boardList"></ol>
+  </section>
+
+  <section id="invView" hidden>
+    <div class="inv-head">
+      <div><h1>Binder</h1><p id="invSub"></p></div>
+      <div class="stats" id="stats"></div>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="device">
+      <h2>Use your binder on another device</h2>
+      <p>Open this private login link on your other phone or computer. Anyone with it can open your packs, so don't post it.</p>
+      <div class="row left"><button class="ghost" id="loginCopy">Copy my login link</button></div>
+    </div>
+  </section>
+  <footer id="foot"></footer>
+</main>
+
+<div class="overlay" id="joinOv" hidden>
+  <form class="join" id="joinForm" autocomplete="off">
+    <div class="medal big" aria-hidden="true"></div>
+    <h1>Darryl Wednesdays</h1>
+    <p class="invited" id="invited" hidden></p>
+    <p>Open a free pack of Darryl cards every day, and three on Wednesdays. Pick the name that shows on the feed and leaderboard.</p>
+    <label for="nameIn">Your name</label>
+    <input id="nameIn" maxlength="20" placeholder="e.g. Tanner" required>
+    <button class="cta" id="joinBtn" type="submit">Start collecting</button>
+    <p class="err" id="joinErr" hidden></p>
+  </form>
+</div>
+<div class="overlay" id="overlay" hidden><div class="stage" id="stage"></div></div>
+<div class="modal" id="modal" hidden></div>
+<canvas id="confetti" hidden></canvas>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const CARDS=[
+  {n:1,name:"Bottle Balance"},{n:2,name:"The Portrait"},{n:3,name:"Red Carpet",pos:"center 20%"},
+  {n:4,name:"Balloon Hat"},{n:5,name:"Snap Story"},{n:6,name:"Euro Summer"},{n:7,name:"Jays Night"},
+  {n:8,name:"Arctic Edition"},{n:9,name:"Late Night"},{n:10,name:"Split Screen"},{n:11,name:"Suit Up"},
+  {n:12,name:"Lights Out"},{n:13,name:"Farm Hand"},{n:14,name:"Group Chat"},{n:15,name:"Taco Night"},
+  {n:16,name:"Fridge Lean"},{n:17,name:"Cottage Cheese"},{n:18,name:"Frat Couch"},{n:19,name:"Night Bus"},
+  {n:20,name:"Booth Seat"},{n:21,name:"Bag Head"},{n:22,name:"Oktoberfest"},{n:23,name:"Hang Loose"},
+  {n:24,name:"Rough Night"},{n:25,name:"Pink Room",goldOnly:true}
+].map(c=>({...c,img:`/img/d${c.n}.jpg`}));
+const POOL=CARDS.filter(c=>!c.goldOnly);
+const PARS=[
+  {k:"gold",label:"Gold",print:1,odds:"1 in 2,000",color:"var(--foil)"},
+  {k:"red",label:"Red",print:5,odds:"1 in 100",color:"var(--red)"},
+  {k:"orange",label:"Orange",print:10,odds:"1 in 50",color:"var(--orange)"},
+  {k:"blue",label:"Blue",print:25,odds:"1 in 20",color:"var(--blue)"},
+  {k:"green",label:"Green",print:99,odds:"1 in 8",color:"var(--green)"},
+  {k:"base",label:"Base",print:0,odds:"about 4 in 5",color:"#d9d4e0"}
+];
+const PAR=Object.fromEntries(PARS.map(p=>[p.k,p]));
+const RANK=Object.fromEntries(PARS.map((p,i)=>[p.k,PARS.length-i]));
+const TOKEN_KEY="darryl-token";
+
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,"0");
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const cardOf=n=>CARDS.find(c=>c.n===n);
+const reduced=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
+const serialText=(par,serial)=>PAR[par].print===1?"1/1":`${pad(serial)}/${PAR[par].print}`;
+
+/* ---------- api ---------- */
+let token=null;
+try{token=localStorage.getItem(TOKEN_KEY)}catch(e){}
+function setToken(t){token=t;try{t?localStorage.setItem(TOKEN_KEY,t):localStorage.removeItem(TOKEN_KEY)}catch(e){}}
+async function api(path,body){
+  const r=await fetch("/api/"+path,{method:body?"POST":"GET",headers:{"content-type":"application/json",...(token?{authorization:"Bearer "+token}:{})},body:body?JSON.stringify(body):undefined});
+  let j={};try{j=await r.json()}catch(e){}
+  if(!r.ok){const err=new Error(j.error||"Something went wrong. Try again.");err.status=r.status;err.data=j;throw err}
+  return j;
+}
+
+/* ---------- state ---------- */
+let S=null, resetAt=0, tick=null, view="packs";
+function setState(s){S=s;resetAt=Date.now()+s.secsLeft*1000;renderAll()}
+function renderAll(){renderPacks();$("invCount").textContent=S?S.inv.length:0;if(view==="inv")renderInv()}
+
+/* ---------- card markup ---------- */
+function cardHTML(pull,{facedown=false,cls=""}={}){
+  const c=cardOf(pull.card),p=PAR[pull.par],numbered=pull.par!=="base";
+  return `<div class="card p-${p.k} ${numbered?"numbered":""} ${facedown?"facedown":""} ${cls}">
+    <div class="inner">
+      <div class="face front"><div class="frame">
+        <div class="photo" style="background-image:url(${c.img});${c.pos?`background-position:${c.pos}`:""}"></div>
+        <div class="topline"><span class="wm">DARRYL</span><span class="st">S01</span></div>
+        <div class="plate"><span class="no">#${pad(c.n)} · ${p.label.toUpperCase()}</span><span class="nm">${esc(c.name)}</span>${numbered?"":`<span class="pl">Series 01 base</span>`}</div>
+        ${numbered?`<div class="serial">${serialText(pull.par,pull.serial)}</div>`:""}
+        <div class="shine"></div>
+      </div></div>
+      <div class="face back"><div class="bk"><div class="m"></div><b>Darryl<br>Wednesdays</b><span>SERIES 01</span></div></div>
+    </div></div>`;
+}
+
+/* ---------- packs ---------- */
+function renderPacks(){
+  if(!S)return;
+  const left=S.packsLeft;
+  $("banner").innerHTML=S.wed
+    ?`<span class="wed">It's Darryl Wednesday</span><span>3 free packs today</span>`
+    :`<span>1 free pack every day</span><span>·</span><span>3 on Wednesdays</span>`;
+  $("leftBadge").textContent="×"+left;$("leftBadge").hidden=left===0;
+  $("pack").setAttribute("aria-disabled",left===0?"true":"false");
+  $("openBtn").disabled=left===0;
+  $("openBtn").textContent=left===0?"No packs left":(S.used<S.allowance?"Open free pack":"Open bonus pack");
+  if(left===0){$("sub").innerHTML=`Next free pack in<div class="timer" id="timer">--:--:--</div>`;startTimer()}
+  else{$("sub").textContent=`${left} pack${left===1?"":"s"} left today`+(S.bonus?` (${S.bonus} bonus)`:"");stopTimer()}
+  const st=S.streak,into=st%S.streakPerPack,full=st>0&&into===0;
+  let bars="";for(let i=1;i<=S.streakPerPack;i++)bars+=`<i class="${full||i<=into?"on":""}"></i>`;
+  $("streak").innerHTML=`Streak ${st} day${st===1?"":"s"} ${bars} +1 pack every ${S.streakPerPack} days`;
+  $("goldLine").innerHTML=S.goldBy?`Gold 1/1 Pink Room: pulled by <b>${esc(S.goldBy)}</b>`:`Gold 1/1 Pink Room: <b>still in a pack somewhere</b>`;
+  const link=`${location.origin}/?ref=${S.code}`;
+  $("refLink").value=link;
+  const into2=S.refs%S.refsPerPack;let dots="";
+  for(let i=1;i<=S.refsPerPack;i++)dots+=`<i class="${i<=into2?"on":""}">${i}</i>`;
+  $("refProg").innerHTML=`${dots}<span>${into2} of ${S.refsPerPack} toward your next pack · ${S.refs} friend${S.refs===1?"":"s"} joined</span>`;
+}
+function startTimer(){
+  stopTimer();
+  const step=()=>{
+    let s=Math.max(0,Math.round((resetAt-Date.now())/1000));
+    const el=$("timer");if(el)el.textContent=pad(Math.floor(s/3600))+":"+pad(Math.floor(s%3600/60))+":"+pad(s%60);
+    if(s<=0){stopTimer();setTimeout(refresh,1500)}
+  };step();tick=setInterval(step,1000);
+}
+function stopTimer(){if(tick){clearInterval(tick);tick=null}}
+$("odds").innerHTML=[...PARS].reverse().map(p=>`<div class="odd" style="--pc:${p.color}">
+  <span class="nm">${p.label}</span><span class="pr">${p.print?(p.print===1?"1/1":"/"+p.print):"Base"}</span><span class="rt">${p.odds}${p.k==="gold"?" · only one exists":""}</span></div>`).join("");
+
+/* ---------- opening ---------- */
+let session=null, busy=false;
+async function beginOpen(){
+  if(busy||!S||S.packsLeft<=0)return;
+  busy=true;$("openBtn").disabled=true;
+  const pack=$("pack");pack.classList.add("tearing","dropping");
+  const wait=new Promise(r=>setTimeout(r,reduced()?10:950));
+  try{
+    const [res]=await Promise.all([api("open",{}),wait]);
+    session={pulls:res.pulls,i:0,revealed:new Set(),reward:res.reward};
+    S=res.state;resetAt=Date.now()+S.secsLeft*1000;
+    pack.classList.remove("tearing","dropping");
+    $("overlay").hidden=false;document.body.style.overflow="hidden";drawStage(true);
+    renderAll();
+  }catch(e){
+    await wait;pack.classList.remove("tearing","dropping");
+    if(e.data&&e.data.state)setState(e.data.state);
+    toast(e.message);
+  }finally{busy=false;if(S)$("openBtn").disabled=S.packsLeft===0}
+}
+function drawStage(anim){
+  const {pulls,i,revealed}=session,pull=pulls[i],isRev=revealed.has(i);
+  const p=PAR[pull.par],c=cardOf(pull.card);
+  const last=i===pulls.length-1,allRev=revealed.size===pulls.length;
+  $("stage").innerHTML=`
+    <div class="pager"><button id="pv" aria-label="Previous card" ${i===0?"disabled":""}>‹</button><span>${i+1} / ${pulls.length}</span><button id="nx" aria-label="Next card" ${last||!isRev?"disabled":""}>›</button></div>
+    <button id="flipCard" aria-label="${isRev?"Card":"Tap to reveal"}" style="border-radius:14px">${cardHTML(pull,{facedown:!isRev,cls:anim?"appear":""})}</button>
+    <div class="reveal">${isRev
+      ?`<span class="tier" style="--pc:${p.color}">${p.label}${p.print?(p.print===1?" 1/1":" /"+p.print):""}</span>
+        <span class="big">#${pad(c.n)} ${esc(c.name)}</span>
+        <span class="meta">${p.print?(p.print===1?"The only one in existence":"Serial "+pad(pull.serial)+" of "+p.print)+" · "+p.odds+" pulls":"Base card · "+p.odds+" pulls"}</span>`
+      :`<span class="hint">Tap the card to flip it</span>`}</div>
+    <div class="row">${allRev
+      ?`<button class="cta" id="done">Continue</button><button class="ghost" id="toInv">View binder</button>`
+      :(isRev&&!last?`<button class="cta" id="nextBtn">Next card</button>`:"")}</div>`;
+  $("pv").onclick=()=>{session.i--;drawStage(false)};
+  $("nx").onclick=()=>{session.i++;drawStage(true)};
+  $("flipCard").onclick=()=>{if(!revealed.has(i))flip()};
+  if($("nextBtn"))$("nextBtn").onclick=()=>{session.i++;drawStage(true)};
+  if($("done"))$("done").onclick=()=>closeStage(false);
+  if($("toInv"))$("toInv").onclick=()=>closeStage(true);
+  ($("nextBtn")||$("done")||$("flipCard")).focus({preventScroll:true});
+}
+function flip(){
+  const i=session.i,pull=session.pulls[i];
+  $("stage").querySelector(".card").classList.remove("facedown","appear");
+  setTimeout(()=>{
+    session.revealed.add(i);drawStage(false);
+    if(pull.par==="gold")goldFlash();
+    else if(RANK[pull.par]>=RANK.blue)confetti(PAR[pull.par].color,pull.par==="blue"?60:pull.par==="orange"?110:170);
+  },650);
+}
+function closeStage(toInv){
+  $("overlay").hidden=true;document.body.style.overflow="";
+  const reward=session&&session.reward;session=null;
+  renderAll();
+  if(reward)toast(`${S.streakPerPack}-day streak · +1 free pack`);
+  if(toInv)show("inv");
+}
+
+/* ---------- effects ---------- */
+function goldFlash(){
+  const f=document.createElement("div");f.className="flash";f.innerHTML="<b>GOLD 1/1</b>";
+  document.body.appendChild(f);setTimeout(()=>f.remove(),2500);confetti("#ffc94a",260);
+}
+function confetti(color,n){
+  if(reduced())return;
+  const cv=$("confetti");cv.hidden=false;const ctx=cv.getContext("2d");
+  const dpr=devicePixelRatio||1,W=cv.width=innerWidth*dpr,H=cv.height=innerHeight*dpr;
+  const probe=document.createElement("span");probe.style.color=color;document.body.appendChild(probe);
+  const col=getComputedStyle(probe).color;probe.remove();
+  const cols=[col,"#ffffff","#ffc94a"];
+  const ps=Array.from({length:n},()=>({x:W/2,y:H*.45,vx:(Math.random()-.5)*W*.03,vy:-(Math.random()*H*.025+H*.008),r:(Math.random()*6+4)*dpr,a:Math.random()*6,va:(Math.random()-.5)*.4,c:cols[Math.floor(Math.random()*3)]}));
+  let t=0;
+  (function frame(){
+    ctx.clearRect(0,0,W,H);t++;
+    for(const p of ps){p.x+=p.vx;p.y+=p.vy;p.vy+=H*.0009;p.vx*=.99;p.a+=p.va;
+      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a);ctx.fillStyle=p.c;ctx.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);ctx.restore()}
+    if(t<170)requestAnimationFrame(frame);else{ctx.clearRect(0,0,W,H);cv.hidden=true}
+  })();
+}
+let toastT=null;
+function toast(msg){const t=$("toast");t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,3200)}
+
+/* ---------- binder ---------- */
+function bestOf(n){
+  const mine=S.inv.filter(x=>x.card===n);
+  return mine.length?mine.slice().sort((a,b)=>RANK[b.par]-RANK[a.par]||a.at-b.at)[0]:null;
+}
+function renderInv(){
+  if(!S)return;
+  const uniq=new Set(S.inv.map(x=>x.card)).size;
+  const numbered=S.inv.filter(x=>x.par!=="base").length;
+  $("invSub").textContent=`${uniq} of ${CARDS.length} Darryls collected`;
+  $("stats").innerHTML=`<div><b>${S.inv.length}</b>cards</div><div><b>${numbered}</b>numbered</div><div><b>${S.score}</b>points</div>`;
+  $("grid").innerHTML=CARDS.map(c=>{
+    const b=bestOf(c.n);
+    const dots=[...PARS].reverse().filter(p=>c.goldOnly?p.k==="gold":p.k!=="gold").map(p=>`<i class="${S.inv.some(x=>x.card===c.n&&x.par===p.k)?"on":""}" style="--dc:${p.color}" title="${p.label}"></i>`).join("");
+    if(!b)return `<div class="tile locked"><div style="position:relative;width:100%;max-width:200px">${cardHTML({card:c.n,par:"base"},{facedown:true})}<span class="lockq">?</span></div>
+      <div class="cap">#${pad(c.n)} ???<small>${c.goldOnly?"Gold 1/1 only":"Not pulled yet"}</small></div><div class="dots">${dots}</div></div>`;
+    const count=S.inv.filter(x=>x.card===c.n).length;
+    return `<button class="tile" data-card="${c.n}" aria-label="View ${esc(c.name)}">${cardHTML(b)}
+      <div class="cap">#${pad(c.n)} ${esc(c.name)}<small>Pulled ${count} time${count===1?"":"s"}</small></div><div class="dots">${dots}</div></button>`;
+  }).join("");
+  $("grid").querySelectorAll("button.tile").forEach(t=>t.onclick=()=>openDetail(+t.dataset.card));
+  $("grid").querySelectorAll(".card").forEach(el=>{const w=el.parentElement.getBoundingClientRect().width||150;el.style.setProperty("--w",Math.min(w,200)+"px")});
+}
+function openDetail(cardN,selId){
+  const c=cardOf(cardN);
+  const mine=S.inv.filter(x=>x.card===cardN).sort((a,b)=>RANK[b.par]-RANK[a.par]||(a.serial||0)-(b.serial||0));
+  const sel=mine.find(x=>x.id===selId)||mine[0],p=PAR[sel.par];
+  const baseCount=mine.filter(x=>x.par==="base").length;
+  const chips=mine.filter(x=>x.par!=="base").map(x=>{const q=PAR[x.par];return `<button data-id="${x.id}" style="--pc:${q.color}" aria-pressed="${x.id===sel.id}">${q.label} ${serialText(x.par,x.serial)}</button>`}).join("")
+    +(baseCount?`<button data-id="${mine.find(x=>x.par==="base").id}" style="--pc:#d9d4e0" aria-pressed="${sel.par==="base"}">Base ×${baseCount}</button>`:"");
+  const m=$("modal");
+  m.innerHTML=`<button class="close" id="mClose" aria-label="Close">✕</button>
+    <div class="stage">
+      <div id="spinWrap" class="spin">${cardHTML(sel)}</div>
+      <div class="hint">Drag to turn it round</div>
+      <div class="reveal"><span class="tier" style="--pc:${p.color}">${p.label}${p.print?(p.print===1?" 1/1":" /"+p.print):""}</span>
+        <span class="big">#${pad(c.n)} ${esc(c.name)}</span>
+        <span class="meta">Pulled ${mine.length} time${mine.length===1?"":"s"} · ${mine.length-baseCount} numbered</span></div>
+      <div class="versions">${chips}</div>
+      <button class="ghost" id="mDone">Done</button>
+    </div>`;
+  m.hidden=false;document.body.style.overflow="hidden";
+  m.querySelector(".stage .card").style.setProperty("--w","min(300px,74vw)");
+  m.querySelectorAll(".versions button").forEach(b=>b.onclick=()=>openDetail(cardN,b.dataset.id));
+  $("mClose").onclick=$("mDone").onclick=closeDetail;
+  setupSpin($("spinWrap"));
+}
+function closeDetail(){$("modal").hidden=true;document.body.style.overflow=""}
+function setupSpin(wrap){
+  const inner=wrap.querySelector(".inner"),shine=wrap.querySelector(".shine");
+  let rot=0,start=null,base=0,tiltX=0;
+  const apply=()=>{inner.style.transform=`rotateX(${tiltX}deg) rotateY(${rot}deg)`};
+  wrap.addEventListener("pointerdown",e=>{wrap.setPointerCapture(e.pointerId);wrap.classList.remove("settle");start=e.clientX;base=rot});
+  wrap.addEventListener("pointermove",e=>{
+    const r=wrap.getBoundingClientRect();
+    if(start!==null)rot=base+(e.clientX-start)*.7;
+    tiltX=((e.clientY-r.top)/r.height-.5)*-14;
+    if(shine)shine.style.setProperty("--sx",Math.round((e.clientX-r.left)/r.width*100)+"%");
+    apply();
+  });
+  const end=()=>{if(start===null)return;start=null;wrap.classList.add("settle");rot=Math.round(rot/180)*180;tiltX=0;apply()};
+  wrap.addEventListener("pointerup",end);wrap.addEventListener("pointercancel",end);
+  wrap.addEventListener("pointerleave",()=>{if(start===null){tiltX=0;wrap.classList.add("settle");apply()}});
+}
+
+/* ---------- feed & leaderboard ---------- */
+function ago(t){const s=Math.max(1,Math.round((Date.now()-t)/1000));if(s<60)return s+"s ago";const m=Math.round(s/60);if(m<60)return m+"m ago";const h=Math.round(m/60);if(h<24)return h+"h ago";return Math.round(h/24)+"d ago"}
+async function loadFeed(){
+  const el=$("feedList");
+  try{
+    const {items}=await api("feed");
+    el.innerHTML=items.length?items.map(x=>{const c=cardOf(x.card),p=PAR[x.par];if(!c||!p)return"";
+      return `<li class="${x.par==="gold"?"gold":""}" style="--pc:${p.color}"><span class="thumb" style="background-image:url(${c.img})"></span>
+        <span class="what"><b>${esc(x.name)}</b> pulled #${pad(c.n)} ${esc(c.name)}<span>${ago(x.at)}</span></span>
+        <span class="tag">${p.label} ${serialText(x.par,x.serial)}</span></li>`}).join("")
+      :`<li class="empty" style="display:block">No numbered pulls yet. Open a pack and be first.</li>`;
+  }catch(e){el.innerHTML=`<li class="empty" style="display:block">${esc(e.message)}</li>`}
+}
+async function loadBoard(){
+  const el=$("boardList");
+  try{
+    const {rows}=await api("leaderboard");
+    el.innerHTML=rows.length?rows.map((r,i)=>`<li class="${r.you?"you":""}"><span class="rk">${i+1}</span>
+      <span class="who">${esc(r.name)}${r.you?" (you)":""}<span>${r.cards} card${r.cards===1?"":"s"} · ${r.packs} pack${r.packs===1?"":"s"}</span></span><span class="pts">${r.score.toLocaleString()}</span></li>`).join("")
+      :`<li class="empty" style="display:block">Nobody has opened a pack yet.</li>`;
+  }catch(e){el.innerHTML=`<li class="empty" style="display:block">${esc(e.message)}</li>`}
+}
+
+/* ---------- nav ---------- */
+function show(v){
+  view=v;
+  for(const [k,id] of [["packs","packsView"],["feed","feedView"],["board","boardView"],["inv","invView"]])$(id).hidden=k!==v;
+  document.querySelectorAll(".nav button").forEach(b=>b.setAttribute("aria-current",String(b.dataset.view===v)));
+  if(v==="inv")renderInv();if(v==="feed")loadFeed();if(v==="board")loadBoard();
+  scrollTo({top:0});
+}
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>show(b.dataset.view));
+$("feedRefresh").onclick=loadFeed;$("boardRefresh").onclick=loadBoard;
+$("openBtn").onclick=beginOpen;$("pack").onclick=beginOpen;
+$("pack").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();beginOpen()}};
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("modal").hidden)closeDetail()});
+addEventListener("resize",()=>{if(view==="inv")renderInv()});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&token&&!busy&&!session)refresh()});
+
+async function copyText(text,okMsg,input){
+  try{await navigator.clipboard.writeText(text);toast(okMsg)}
+  catch(e){if(input){input.focus();input.select()}toast("Select the link and copy it")}
+}
+$("copyBtn").onclick=()=>copyText($("refLink").value,"Invite link copied",$("refLink"));
+if(navigator.share){$("shareBtn").hidden=false;$("shareBtn").onclick=()=>navigator.share({title:"Darryl Wednesdays",text:"Open free Darryl packs with me. Use my link and you start with a bonus pack.",url:$("refLink").value}).catch(()=>{})}
+$("loginCopy").onclick=()=>copyText(`${location.origin}/?key=${token}`,"Login link copied. Keep it private.");
+
+/* ---------- join & boot ---------- */
+const params=new URLSearchParams(location.search);
+const refCode=(params.get("ref")||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
+if(params.get("key")&&/^[a-f0-9]{48}$/.test(params.get("key")))setToken(params.get("key"));
+if(params.has("key")||params.has("ref")){try{if(refCode)sessionStorage.setItem("darryl-ref",refCode)}catch(e){}history.replaceState(null,"",location.pathname+location.hash)}
+function savedRef(){if(refCode)return refCode;try{return sessionStorage.getItem("darryl-ref")||""}catch(e){return""}}
+
+async function showJoin(){
+  $("joinOv").hidden=false;
+  const ref=savedRef();
+  if(ref){try{const {name}=await api("invite?code="+ref);if(name){$("invited").textContent=`${name} invited you, so you start with a bonus pack.`;$("invited").hidden=false}}catch(e){}}
+  setTimeout(()=>$("nameIn").focus(),50);
+}
+$("joinForm").onsubmit=async e=>{
+  e.preventDefault();
+  const name=$("nameIn").value.trim();
+  if(!name){$("joinErr").textContent="Pick a name for the leaderboard";$("joinErr").hidden=false;return}
+  $("joinBtn").disabled=true;$("joinErr").hidden=true;
+  try{
+    const res=await api("join",{name,ref:savedRef()});
+    setToken(res.token);try{sessionStorage.removeItem("darryl-ref")}catch(e){}
+    $("joinOv").hidden=true;setState(res.state);
+    if(res.invitedBy)toast(`Bonus pack from ${res.invitedBy} added`);
+  }catch(err){$("joinErr").textContent=err.message;$("joinErr").hidden=false}
+  finally{$("joinBtn").disabled=false}
+};
+async function refresh(){
+  try{const {state}=await api("me");$("netWarn").hidden=true;setState(state)}
+  catch(e){
+    if(e.status===401){setToken(null);showJoin();return}
+    $("netWarn").textContent="Can't reach the server right now. Check your connection and reload.";$("netWarn").hidden=false;
+  }
+}
+$("foot").textContent=`Series 01 · ${POOL.length} base cards · 5 numbered parallels · one Gold 1/1`;
+api("health").then(h=>{$("dbWarn").hidden=h.db!=="memory"}).catch(()=>{});
+const startView=location.hash.slice(1);
+if(token)refresh();else showJoin();
+if(["feed","board","inv"].includes(startView))show(startView);
+</script>
+</body>
+</html>

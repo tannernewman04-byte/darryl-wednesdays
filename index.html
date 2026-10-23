@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Darryl Wednesdays</title>
-<meta name="description" content="Open your free daily Darryl pack. Three on Wednesdays.">
+<meta name="description" content="Open a free Darryl pack every 3 hours. Three at a time on Wednesdays.">
 <meta property="og:title" content="Darryl Wednesdays">
-<meta property="og:description" content="Open your free daily Darryl pack. Three on Wednesdays.">
+<meta property="og:description" content="Open a free Darryl pack every 3 hours. Three at a time on Wednesdays.">
 <meta property="og:image" content="/img/og.jpg">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
@@ -291,6 +291,18 @@ img{max-width:100%}
 .join .cta{justify-self:stretch}
 .join .err{color:#ff8a98}
 .jstep{display:grid;gap:8px}
+.codebox{display:grid;justify-items:center;gap:8px;margin:16px auto 0;max-width:380px;text-align:center}
+.codebox label{font-family:var(--cond);font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:13px;color:var(--muted)}
+.codebox .row{width:100%;flex-wrap:nowrap}
+.codebox input{flex:1;min-width:0;background:var(--bg2);border:1px solid var(--line);color:var(--fg);border-radius:999px;padding:10px 16px;font:600 15px var(--body);letter-spacing:.08em;text-transform:uppercase}
+.codebox input::placeholder{text-transform:none;letter-spacing:0}
+.codebox .err{color:#ff8a98;margin:0;font-size:14px}
+.pwbox{margin-top:14px;display:grid;gap:8px;max-width:460px}
+.pwbox label{font-family:var(--cond);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:13px;color:var(--muted)}
+.pwbox input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);color:var(--fg);border-radius:10px;padding:11px 12px;font:500 16px var(--body)}
+.pwbox .err{color:#ff8a98;margin:0}
+.pwnag{margin:14px auto 0;max-width:520px;text-align:center;font-size:14px;color:var(--muted)}
+.pwnag button{color:var(--foil);text-decoration:underline;font-weight:600}
 .linkbtn{color:var(--muted);text-decoration:underline;font-size:14px;padding:2px 4px}
 .medal.big{justify-self:center;width:96px;aspect-ratio:1;border-radius:50%;background:url(/img/d2.jpg) center 22%/cover;border:4px solid var(--foil)}
 </style>
@@ -320,7 +332,7 @@ img{max-width:100%}
           <div class="body"></div>
           <div class="tear"><div class="crimp top"></div></div>
           <div class="content">
-            <div class="series" id="packSeries">SERIES 01 · DAILY PACK</div>
+            <div class="series" id="packSeries">SERIES 01 · FREE PACK</div>
             <div class="medal"></div>
             <div class="title"><small id="packCount">3 cards</small>Darryl<br>Wednesdays</div>
           </div>
@@ -333,8 +345,14 @@ img{max-width:100%}
       <div class="sub" id="sub"></div>
     </div>
     <div class="strip"><div class="streak" id="streak"></div></div>
+    <form class="codebox" id="codeBox" novalidate>
+      <label for="packCodeIn">Have a pack code?</label>
+      <div class="row"><input id="packCodeIn" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Enter code"><button class="ghost" id="codeBtn" type="submit">Redeem</button></div>
+      <p class="err" id="codeErr" hidden></p>
+    </form>
 
     <div class="goldline" id="goldLine"></div>
+    <p class="pwnag" id="pwNag" hidden>Create a password so you can sign in on any device. <button type="button" id="pwNagBtn">Set it up</button></p>
 
     <div class="refer" id="refer">
       <div class="refer-copy">
@@ -376,20 +394,30 @@ img{max-width:100%}
     <div class="device">
       <h2>Use your binder on another device</h2>
       <p id="deviceTxt">On your other phone or computer, open the site and sign in with the same email.</p>
+      <form class="pwbox" id="pwBox" hidden novalidate>
+        <input type="email" id="pwBoxUser" autocomplete="username" hidden>
+        <label for="pwBoxIn">Create a password so you can sign in anywhere</label>
+        <div class="row left"><input id="pwBoxIn" type="password" autocomplete="new-password" maxlength="100" placeholder="At least 8 characters"><button class="cta small" id="pwBoxBtn" type="submit">Save password</button></div>
+        <p class="err" id="pwBoxErr" hidden></p>
+      </form>
     </div>
   </section>
   <footer id="foot"></footer>
 </main>
 
 <div class="overlay" id="joinOv" hidden>
-  <form class="join" id="joinForm" autocomplete="off" novalidate>
+  <form class="join" id="joinForm" novalidate>
     <div class="medal big" aria-hidden="true"></div>
     <h1>Darryl Wednesdays</h1>
     <p class="invited" id="invited" hidden></p>
     <p id="joinIntro"></p>
     <div class="jstep" id="stepEmail">
       <label for="emailIn">Email</label>
-      <input id="emailIn" type="email" autocomplete="email" maxlength="120" placeholder="you@example.com">
+      <input id="emailIn" type="email" name="email" autocomplete="username" maxlength="120" placeholder="you@example.com">
+    </div>
+    <div class="jstep" id="stepPw" hidden>
+      <label for="pwIn">Password</label>
+      <input id="pwIn" type="password" name="password" autocomplete="current-password" maxlength="100">
     </div>
     <div class="jstep" id="stepCode" hidden>
       <label for="codeIn">6-digit code</label>
@@ -398,8 +426,11 @@ img{max-width:100%}
         <label for="nameIn">Your name</label>
         <input id="nameIn" maxlength="20" placeholder="e.g. Tanner">
       </div>
+      <label for="newPwIn" id="newPwLabel">Create a password</label>
+      <input id="newPwIn" type="password" name="new-password" autocomplete="new-password" maxlength="100" placeholder="At least 8 characters">
     </div>
     <button class="cta" id="joinBtn" type="submit">Send code</button>
+    <div class="row" id="pwLinks" hidden><button type="button" class="linkbtn" id="forgotBtn">Forgot password?</button><button type="button" class="linkbtn" id="changeEmail2">Use a different email</button></div>
     <div class="row" id="codeLinks" hidden><button type="button" class="linkbtn" id="resendBtn">Resend code</button><button type="button" class="linkbtn" id="changeEmail">Use a different email</button></div>
     <p class="err" id="joinErr" hidden></p>
   </form>
@@ -459,7 +490,7 @@ async function api(path,body){
 /* ---------- state ---------- */
 let S=null, resetAt=0, tick=null, view="packs";
 function setState(s){S=s;resetAt=Date.now()+s.secsLeft*1000;renderAll()}
-function renderAll(){if(S&&S.email)$("deviceTxt").textContent=`Signed in as ${S.email}. On your other phone or computer, open the site and sign in with the same email.`;renderPacks();$("invCount").textContent=S?S.inv.length:0;if(view==="inv")renderInv()}
+function renderAll(){if(S){const need=!!S.email&&!S.hasPassword;$("pwBox").hidden=!need;$("pwNag").hidden=!need;$("pwBoxUser").value=S.email||""}if(S&&S.email)$("deviceTxt").textContent=`Signed in as ${S.email}. On your other phone or computer, open the site and sign in with the same email.`;renderPacks();$("invCount").textContent=S?S.inv.length:0;if(view==="inv")renderInv()}
 
 /* ---------- card markup ---------- */
 function cardHTML(pull,{facedown=false,cls=""}={}){
@@ -483,15 +514,15 @@ function renderPacks(){
   if(!S)return;
   const left=S.packsLeft;
   $("banner").innerHTML=S.wed
-    ?`<span class="wed">It's Darryl Wednesday</span><span>3 free packs today</span>`
-    :`<span>1 free pack every day</span><span>·</span><span>3 on Wednesdays</span>`;
+    ?`<span class="wed">It's Darryl Wednesday</span><span>3 free packs every ${S.everyHours} hours</span>`
+    :`<span>1 free pack every ${S.everyHours} hours</span><span>·</span><span>3 at a time on Wednesdays</span>`;
   $("leftBadge").textContent="×"+left;$("leftBadge").hidden=left===0;
   $("pack").setAttribute("aria-disabled",left===0?"true":"false");
   $("openBtn").disabled=left===0;
-  $("hobbyBtn").hidden=!S.hobby;$("hobbyTxt").textContent=`×${S.hobby} · ${S.hobbySize} cards · earned from invites`;
+  $("hobbyBtn").hidden=!S.hobby;$("hobbyTxt").textContent=`×${S.hobby} · ${S.hobbySize} cards`;
   $("openBtn").textContent=left===0?"No packs left":(S.used<S.allowance?"Open free pack":"Open bonus pack");
   if(left===0){$("sub").innerHTML=`Next free pack in<div class="timer" id="timer">--:--:--</div>`;startTimer()}
-  else{$("sub").textContent=`${left} pack${left===1?"":"s"} left today`+(S.bonus?` (${S.bonus} bonus)`:"");stopTimer()}
+  else{$("sub").innerHTML=`${left} pack${left===1?"":"s"} ready`+(S.bonus?` (${S.bonus} bonus)`:"")+` · free packs refresh in <b id="timer">--:--:--</b>`;startTimer()}
   const st=S.streak,into=st%S.streakPerPack,full=st>0&&into===0;
   let bars="";for(let i=1;i<=S.streakPerPack;i++)bars+=`<i class="${full||i<=into?"on":""}"></i>`;
   $("streak").innerHTML=`Streak ${st} day${st===1?"":"s"} ${bars} +1 pack every ${S.streakPerPack} days`;
@@ -521,7 +552,7 @@ async function beginOpen(kind="daily"){
   if(busy||!S||(hobby?S.hobby<=0:S.packsLeft<=0))return;
   busy=true;$("openBtn").disabled=true;$("hobbyBtn").disabled=true;
   const pack=$("pack"),wrap=pack.parentElement;
-  const look=on=>{pack.classList.toggle("hobby-look",on);$("packSeries").textContent=on?"SERIES 01 · HOBBY PACK":"SERIES 01 · DAILY PACK";$("packCount").textContent=on?`${S.hobbySize} cards`:"3 cards";if(on)pack.setAttribute("aria-disabled","false")};
+  const look=on=>{pack.classList.toggle("hobby-look",on);$("packSeries").textContent=on?"SERIES 01 · HOBBY PACK":"SERIES 01 · FREE PACK";$("packCount").textContent=on?`${S.hobbySize} cards`:"3 cards";if(on)pack.setAttribute("aria-disabled","false")};
   if(hobby)look(true);
   const steps=[[0,()=>pack.classList.add("spinning")],[950,()=>wrap.classList.add("gripping")],[1250,()=>{wrap.classList.remove("gripping");pack.classList.add("ripped")}],
     [1650,()=>pack.classList.add("peeking")],[2250,()=>wrap.classList.add("dropping")]];
@@ -741,26 +772,38 @@ if(params.get("key")&&/^[a-f0-9]{48}$/.test(params.get("key")))setToken(params.g
 if(params.has("key")||params.has("ref")){try{if(refCode)sessionStorage.setItem("darryl-ref",refCode)}catch(e){}history.replaceState(null,"",location.pathname+location.hash)}
 function savedRef(){if(refCode)return refCode;try{return sessionStorage.getItem("darryl-ref")||""}catch(e){return""}}
 
-let J={step:"email",email:"",exists:false};
+let J={step:"email",email:"",exists:false,reset:false};
 /* remember a sent code for 10 minutes, so leaving to check email doesn't reset sign-up */
 const PEND="darryl-pending",PEND_MS=10*60*1000;
-function savePending(){try{localStorage.setItem(PEND,JSON.stringify({email:J.email,exists:J.exists,name:$("nameIn").value,at:Date.now()}))}catch(e){}}
+function savePending(){try{localStorage.setItem(PEND,JSON.stringify({email:J.email,exists:J.exists,reset:J.reset,name:$("nameIn").value,at:Date.now()}))}catch(e){}}
 function loadPending(){try{const o=JSON.parse(localStorage.getItem(PEND)||"null");if(o&&o.email&&Date.now()-o.at<PEND_MS)return o}catch(e){}return null}
 function clearPending(){try{localStorage.removeItem(PEND)}catch(e){}}
 const legacy=()=>!!(S&&S.needsEmail);
 function joinErr(m){$("joinErr").textContent=m||"";$("joinErr").hidden=!m}
 function renderJoin(){
-  const code=J.step==="code";
-  $("stepEmail").hidden=code;$("stepCode").hidden=!code;$("codeLinks").hidden=!code;
+  const st=J.step,code=st==="code",pw=st==="password";
+  $("stepEmail").hidden=code;$("stepPw").hidden=!pw;$("stepCode").hidden=!code;
+  $("codeLinks").hidden=!code;$("pwLinks").hidden=!pw;
+  $("emailIn").readOnly=pw;
   $("nameWrap").hidden=J.exists||legacy();
-  $("joinIntro").textContent=code?`We emailed a 6-digit code to ${J.email}. It can take a minute, so check your spam folder too.`
+  $("newPwLabel").textContent=J.reset?"Choose a new password":"Create a password";
+  $("joinIntro").textContent=
+    pw?"Welcome back. Enter your password to sign in."
+    :code?`We emailed a 6-digit code to ${J.email}. It can take a minute, so check your spam folder too.`
     :legacy()?"Add your email to keep opening packs. Your binder, points and streak stay the same. One account per email."
-    :"Open a free pack of Darryl cards every day, and three on Wednesdays. Sign up or sign in with your email. One account per person.";
-  $("joinBtn").textContent=code?(J.exists?"Sign in":legacy()?"Confirm email":"Start collecting"):"Send code";
+    :"Open a free pack of Darryl cards every 3 hours, three at a time on Wednesdays. Sign up or sign in with your email. One account per person.";
+  $("joinBtn").textContent=pw?"Sign in":code?(J.reset?"Save and sign in":J.exists?"Sign in":legacy()?"Confirm email":"Start collecting"):"Continue";
+}
+function finishSignIn(res,msg){
+  clearPending();
+  if(res.token)setToken(res.token);
+  try{sessionStorage.removeItem("darryl-ref")}catch(e){}
+  $("joinOv").hidden=true;$("pwIn").value="";$("newPwIn").value="";setState(res.state);
+  if(res.invitedBy)toast(`Bonus pack from ${res.invitedBy} added`);else if(msg)toast(msg);
 }
 async function showJoin(){
   const pend=loadPending();
-  J=pend?{step:"code",email:pend.email,exists:!!pend.exists}:{step:"email",email:"",exists:false};
+  J=pend?{step:"code",email:pend.email,exists:!!pend.exists,reset:!!pend.reset}:{step:"email",email:"",exists:false,reset:false};
   if(pend){$("emailIn").value=pend.email;if(pend.name)$("nameIn").value=pend.name}
   joinErr("");renderJoin();
   $("joinOv").hidden=false;$("invited").hidden=true;
@@ -780,26 +823,47 @@ $("joinForm").onsubmit=async e=>{
     if(J.step==="email"){
       J.email=$("emailIn").value.trim();
       if(!/^\S+@\S+\.\S+$/.test(J.email))throw new Error("Enter your email address");
-      await requestCode();
+      const look=await api("lookup",{email:J.email});
+      J.exists=look.exists;J.reset=false;
+      if(look.hasPassword){J.step="password";renderJoin();setTimeout(()=>$("pwIn").focus(),50)}
+      else await requestCode();
+    }else if(J.step==="password"){
+      const password=$("pwIn").value;
+      if(!password)throw new Error("Enter your password");
+      const res=await api("login",{email:J.email,password});
+      finishSignIn(res,`Signed in as ${res.state.name}`);
     }else{
       const code=$("codeIn").value.replace(/\D/g,"");
       if(code.length!==6)throw new Error("Enter the 6-digit code from the email");
       const name=$("nameIn").value.trim();
       if(!J.exists&&!legacy()&&!name)throw new Error("Pick a name for the leaderboard");
-      const res=await api("verify",{email:J.email,code,name,ref:savedRef()});
-      clearPending();
-      if(res.token)setToken(res.token);
-      try{sessionStorage.removeItem("darryl-ref")}catch(e){}
-      $("joinOv").hidden=true;setState(res.state);
-      if(res.invitedBy)toast(`Bonus pack from ${res.invitedBy} added`);
-      else if(J.exists)toast(`Signed in as ${res.state.name}`);
+      const password=$("newPwIn").value;
+      if(password.length<8)throw new Error("Use at least 8 characters for your password");
+      const res=await api("verify",{email:J.email,code,name,password,ref:savedRef()});
+      finishSignIn(res,J.reset?"Password changed":J.exists?`Signed in as ${res.state.name}`:"");
     }
   }catch(err){joinErr(err.message)}
   finally{$("joinBtn").disabled=false}
 };
 $("nameIn").addEventListener("input",()=>{if(J.step==="code")savePending()});
 $("resendBtn").onclick=async()=>{joinErr("");try{await requestCode();toast("New code sent")}catch(e){joinErr(e.message)}};
-$("changeEmail").onclick=()=>{clearPending();J.step="email";joinErr("");renderJoin();$("emailIn").focus()};
+$("forgotBtn").onclick=async()=>{joinErr("");J.reset=true;try{await requestCode()}catch(e){J.reset=false;joinErr(e.message)}};
+const backToEmail=()=>{clearPending();J.step="email";J.reset=false;$("emailIn").readOnly=false;joinErr("");renderJoin();$("emailIn").focus()};
+$("changeEmail").onclick=backToEmail;$("changeEmail2").onclick=backToEmail;
+/* older accounts without a password can add one while signed in */
+$("pwBox").onsubmit=async e=>{
+  e.preventDefault();$("pwBoxErr").hidden=true;$("pwBoxBtn").disabled=true;
+  try{const {state}=await api("password",{password:$("pwBoxIn").value});$("pwBoxIn").value="";setState(state);toast("Password saved")}
+  catch(err){$("pwBoxErr").textContent=err.message;$("pwBoxErr").hidden=false}
+  finally{$("pwBoxBtn").disabled=false}
+};
+$("codeBox").onsubmit=async e=>{
+  e.preventDefault();$("codeErr").hidden=true;$("codeBtn").disabled=true;
+  try{const res=await api("redeem",{code:$("packCodeIn").value});$("packCodeIn").value="";setState(res.state);toast(res.message)}
+  catch(err){$("codeErr").textContent=err.message;$("codeErr").hidden=false}
+  finally{$("codeBtn").disabled=false}
+};
+$("pwNagBtn").onclick=()=>{show("inv");setTimeout(()=>{$("pwBox").scrollIntoView({block:"center"});$("pwBoxIn").focus()},60)};
 async function refresh(){
   try{const {state}=await api("me");$("netWarn").hidden=true;setState(state);if(state.needsEmail)showJoin()}
   catch(e){

@@ -1,6 +1,6 @@
 # Darryl Wednesdays
 
-Daily Darryl card packs: 1 free pack a day (3 on Wednesdays), streak and referral bonus packs,
+Darryl card packs: 1 free pack every 3 hours (3 at a time on Wednesdays), streak and referral bonus packs, pack codes (`PACK_CODES` in `lib/cards.js`),
 numbered parallels with serials that are unique across everyone, a signed 1/1 Auto of every card, one Gold 1/1, a live feed and a leaderboard.
 
 ## Put it online (about 10 minutes)

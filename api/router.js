@@ -99,7 +99,7 @@ async function route_open(req, res) {
   const p = await auth(req);
   if (!p) return send(res, 401, { error: "Not signed in" });
   const body = await readBody(req);
-  const out = await openPack(p, body.kind === "hobby" ? "hobby" : "daily");
+  const out = await openPack(p, ["hobby", "darryl"].includes(body.kind) ? body.kind : "daily");
   if (out.error) return send(res, out.status, { error: out.error, state: await stateFor(p) });
   send(res, 200, { pulls: out.pulls, reward: out.reward, state: await stateFor(p) });
 }
@@ -136,10 +136,14 @@ async function route_redeem(req, res) {
     if ((await store.incr(failKey)) === 1) await store.expire(failKey, 3600);
     return send(res, 404, { error: "That code doesn't exist" });
   }
-  if (!(await store.set(`redeemed:${code}:${p.id}`, "1", { nx: true }))) return send(res, 409, { error: "You already used this code" });
+  const uses = def.uses || 1, usedKey = `redeemed:${code}:${p.id}`;
+  const n = await store.incr(usedKey);
+  if (n > uses) { await store.decr(usedKey); return send(res, 409, { error: uses === 1 ? "You already used this code" : `You've already used this code ${uses} times` }); }
   for (let i = 0; i < (def.hobby || 0); i++) await store.incr(`hobby:${p.id}`);
   for (let i = 0; i < (def.packs || 0); i++) await store.incr(`bonus:${p.id}`);
-  send(res, 200, { message: `${code} redeemed: you got ${def.label}`, state: await stateFor(p) });
+  for (let i = 0; i < (def.darryl || 0); i++) await store.incr(`dpack:${p.id}`);
+  const left = uses - n;
+  send(res, 200, { message: `${code} redeemed: you got ${def.label}` + (left > 0 ? ` (${left} more use${left === 1 ? "" : "s"} left)` : ""), state: await stateFor(p) });
 }
 
 // ---- /api/verify ----

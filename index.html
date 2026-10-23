@@ -93,6 +93,11 @@ header .wrap{display:flex;align-items:center;gap:12px;padding:12px max(16px,env(
 /* pack opening: spin, grip, rip the top, cards peek out, pack drops away */
 .pack.hobby-look .title small{color:#fff}
 .pack-wrap:has(.hobby-look) .left-badge{display:none}
+.pack.darryl-look{--packbg:linear-gradient(115deg,#1a0614 0%,#5a1048 30%,#ff6fd8 58%,#7a2bd6 80%,#1a0614 100%)}
+.pack.darryl-look .title small{color:#fff}
+.pack-wrap:has(.darryl-look) .left-badge{display:none}
+.hobby.dpk{border-color:#ff6fd8;background:linear-gradient(120deg,#3a0c30,#1f1928 70%);box-shadow:0 0 22px rgba(255,111,216,.25)}
+.hobby.dpk b{color:#ff9be6}
 .pack.hobby-look{--packbg:linear-gradient(115deg,#0e0b06 0%,#3a2c0c 32%,#ffc94a 58%,#7a5208 78%,#0e0b06 100%)}
 .hobby{display:grid;gap:2px;border:2px solid var(--foil);border-radius:14px;padding:10px 26px;background:linear-gradient(120deg,#3a2c0c,#1f1928 70%);text-align:center;box-shadow:0 0 22px rgba(255,201,74,.25)}
 .hobby b{font-family:var(--display);font-weight:400;font-size:22px;letter-spacing:.02em;text-transform:uppercase;color:var(--foil);line-height:1.1}
@@ -342,6 +347,7 @@ img{max-width:100%}
       </div>
       <button class="cta" id="openBtn" disabled>Loading…</button>
       <button class="hobby" id="hobbyBtn" hidden><b>Open Hobby pack</b><span id="hobbyTxt"></span></button>
+      <button class="hobby dpk" id="darrylBtn" hidden><b>Open Darryl pack</b><span id="darrylTxt"></span></button>
       <div class="sub" id="sub"></div>
     </div>
     <div class="strip"><div class="streak" id="streak"></div></div>
@@ -520,6 +526,7 @@ function renderPacks(){
   $("pack").setAttribute("aria-disabled",left===0?"true":"false");
   $("openBtn").disabled=left===0;
   $("hobbyBtn").hidden=!S.hobby;$("hobbyTxt").textContent=`×${S.hobby} · ${S.hobbySize} cards`;
+  $("darrylBtn").hidden=!S.darryl;$("darrylTxt").textContent=`×${S.darryl} · ${S.darrylSize} cards`;
   $("openBtn").textContent=left===0?"No packs left":(S.used<S.allowance?"Open free pack":"Open bonus pack");
   if(left===0){$("sub").innerHTML=`Next free pack in<div class="timer" id="timer">--:--:--</div>`;startTimer()}
   else{$("sub").innerHTML=`${left} pack${left===1?"":"s"} ready`+(S.bonus?` (${S.bonus} bonus)`:"")+` · free packs refresh in <b id="timer">--:--:--</b>`;startTimer()}
@@ -548,12 +555,12 @@ $("odds").innerHTML=[...PARS].reverse().map(p=>`<div class="odd" style="--pc:${p
 /* ---------- opening ---------- */
 let session=null, busy=false;
 async function beginOpen(kind="daily"){
-  const hobby=kind==="hobby";
-  if(busy||!S||(hobby?S.hobby<=0:S.packsLeft<=0))return;
-  busy=true;$("openBtn").disabled=true;$("hobbyBtn").disabled=true;
+  const SP={hobby:{have:S&&S.hobby,size:S&&S.hobbySize,cls:"hobby-look",name:"HOBBY PACK"},darryl:{have:S&&S.darryl,size:S&&S.darrylSize,cls:"darryl-look",name:"DARRYL PACK"}}[kind];
+  if(busy||!S||(SP?SP.have<=0:S.packsLeft<=0))return;
+  busy=true;$("openBtn").disabled=true;$("hobbyBtn").disabled=true;$("darrylBtn").disabled=true;
   const pack=$("pack"),wrap=pack.parentElement;
-  const look=on=>{pack.classList.toggle("hobby-look",on);$("packSeries").textContent=on?"SERIES 01 · HOBBY PACK":"SERIES 01 · FREE PACK";$("packCount").textContent=on?`${S.hobbySize} cards`:"3 cards";if(on)pack.setAttribute("aria-disabled","false")};
-  if(hobby)look(true);
+  const look=on=>{pack.classList.remove("hobby-look","darryl-look");if(on)pack.classList.add(SP.cls);$("packSeries").textContent=on?`SERIES 01 · ${SP.name}`:"SERIES 01 · FREE PACK";$("packCount").textContent=on?`${SP.size} cards`:"3 cards";if(on)pack.setAttribute("aria-disabled","false")};
+  if(SP)look(true);
   const steps=[[0,()=>pack.classList.add("spinning")],[950,()=>wrap.classList.add("gripping")],[1250,()=>{wrap.classList.remove("gripping");pack.classList.add("ripped")}],
     [1650,()=>pack.classList.add("peeking")],[2250,()=>wrap.classList.add("dropping")]];
   const timers=reduced()?[]:steps.map(([t,f])=>setTimeout(f,t));
@@ -570,7 +577,7 @@ async function beginOpen(kind="daily"){
     await wait;resetPack();
     if(e.data&&e.data.state)setState(e.data.state);
     toast(e.message);
-  }finally{busy=false;$("hobbyBtn").disabled=false;if(S){$("openBtn").disabled=S.packsLeft===0;renderPacks()}}
+  }finally{busy=false;$("hobbyBtn").disabled=false;$("darrylBtn").disabled=false;if(S){$("openBtn").disabled=S.packsLeft===0;renderPacks()}}
 }
 /* jagged tear line shared by the strip and the pack body so they interlock */
 (function(){const N=16,T=18,pts=[],tear=[],body=[];
@@ -752,7 +759,7 @@ function show(v){
 }
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>show(b.dataset.view));
 $("feedRefresh").onclick=loadFeed;$("boardRefresh").onclick=loadBoard;
-$("openBtn").onclick=()=>beginOpen();$("pack").onclick=()=>beginOpen();$("hobbyBtn").onclick=()=>beginOpen("hobby");
+$("openBtn").onclick=()=>beginOpen();$("pack").onclick=()=>beginOpen();$("hobbyBtn").onclick=()=>beginOpen("hobby");$("darrylBtn").onclick=()=>beginOpen("darryl");
 $("pack").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();beginOpen()}};
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("modal").hidden)closeDetail()});
 addEventListener("resize",()=>{if(view==="inv")renderInv()});

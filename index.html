@@ -390,16 +390,17 @@ const CARDS=[
   {n:12,name:"Lights Out"},{n:13,name:"Farm Hand"},{n:14,name:"Group Chat"},{n:15,name:"Taco Night"},
   {n:16,name:"Fridge Lean"},{n:17,name:"Cottage Cheese"},{n:18,name:"Frat Couch"},{n:19,name:"Night Bus"},
   {n:20,name:"Booth Seat"},{n:21,name:"Bag Head"},{n:22,name:"Oktoberfest"},{n:23,name:"Hang Loose"},
-  {n:24,name:"Rough Night"},{n:25,name:"Pink Room",goldOnly:true}
+  {n:24,name:"Rough Night"},{n:25,name:"Pink Room",goldOnly:true},
+  {n:26,name:"Dorm Duo"},{n:27,name:"Nap Time"},{n:28,name:"Cancun Dig"},{n:29,name:"Uber Ride"},{n:30,name:"Bar Stool"},{n:31,name:"Point Blank"},{n:32,name:"Blue Hour"},{n:33,name:"Camel Selfie"},{n:34,name:"Costume Party"},{n:35,name:"Happy Dad"},{n:36,name:"Shoulder Ride"},{n:37,name:"Under the Bed"},{n:38,name:"Big Feelings"},{n:39,name:"Pinned"}
 ].map(c=>({...c,img:`/img/d${c.n}.jpg`}));
 const POOL=CARDS.filter(c=>!c.goldOnly);
 const PARS=[
-  {k:"gold",label:"Gold",print:1,odds:"1 in 2,000",color:"var(--foil)"},
-  {k:"red",label:"Red",print:5,odds:"1 in 100",color:"var(--red)"},
-  {k:"orange",label:"Orange",print:10,odds:"1 in 50",color:"var(--orange)"},
-  {k:"blue",label:"Blue",print:25,odds:"1 in 20",color:"var(--blue)"},
-  {k:"green",label:"Green",print:99,odds:"1 in 8",color:"var(--green)"},
-  {k:"base",label:"Base",print:0,odds:"about 4 in 5",color:"#d9d4e0"}
+  {k:"gold",label:"Gold",print:1,odds:"1 in 4,000",color:"var(--foil)"},
+  {k:"red",label:"Red",print:5,odds:"1 in 250",color:"var(--red)"},
+  {k:"orange",label:"Orange",print:10,odds:"1 in 120",color:"var(--orange)"},
+  {k:"blue",label:"Blue",print:25,odds:"1 in 50",color:"var(--blue)"},
+  {k:"green",label:"Green",print:99,odds:"1 in 20",color:"var(--green)"},
+  {k:"base",label:"Base",print:0,odds:"about 9 in 10",color:"#d9d4e0"}
 ];
 const PAR=Object.fromEntries(PARS.map(p=>[p.k,p]));
 const RANK=Object.fromEntries(PARS.map((p,i)=>[p.k,PARS.length-i]));

@@ -1,6 +1,20 @@
 {
   "cleanUrls": true,
   "headers": [
-    { "source": "/api/(.*)", "headers": [{ "key": "Cache-Control", "value": "no-store" }] }
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/:route(code|feed|health|invite|join|leaderboard|login|lookup|me|open|password|redeem|verify)",
+      "destination": "/api/router?route=:route"
+    }
   ]
 }

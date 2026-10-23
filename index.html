@@ -61,12 +61,12 @@ header .wrap{display:flex;align-items:center;gap:12px;padding:12px max(16px,env(
 .hero{display:grid;justify-items:center;gap:18px;padding:28px 0 8px}
 .pack-wrap{position:relative;perspective:900px}
 .left-badge{position:absolute;top:-10px;right:-14px;z-index:3;background:var(--red);color:#fff;font-family:var(--display);font-size:20px;min-width:44px;height:44px;border-radius:50%;display:grid;place-items:center;border:3px solid var(--bg);transform:rotate(8deg)}
-.pack{--pw:min(250px,62vw);width:var(--pw);aspect-ratio:5/8;position:relative;border-radius:10px 10px 12px 12px;transform-style:preserve-3d;transition:transform .35s cubic-bezier(.2,.8,.2,1);cursor:pointer;filter:drop-shadow(0 24px 30px rgba(0,0,0,.55))}
+.pack{--packbg:linear-gradient(115deg,#5d2a8a 0%,#2d1546 30%,#b8335a 58%,#ffb547 100%);--pw:min(250px,62vw);width:var(--pw);aspect-ratio:5/8;position:relative;border-radius:10px 10px 12px 12px;transform-style:preserve-3d;transition:transform .35s cubic-bezier(.2,.8,.2,1);cursor:pointer;filter:drop-shadow(0 24px 30px rgba(0,0,0,.55))}
 .pack:hover{transform:rotateY(-8deg) rotateX(4deg) translateY(-4px)}
 .pack[aria-disabled="true"]{cursor:default;filter:grayscale(.85) brightness(.6) drop-shadow(0 20px 26px rgba(0,0,0,.5))}
 .pack[aria-disabled="true"]:hover{transform:none}
 .pack .body{position:absolute;inset:0;border-radius:inherit;overflow:hidden;
-  background:linear-gradient(115deg,#5d2a8a 0%,#2d1546 30%,#b8335a 58%,#ffb547 100%);}
+  background:var(--packbg);}
 .pack .body::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,0) 0 14px,rgba(255,255,255,.07) 14px 15px);mix-blend-mode:overlay}
 .pack .body::after{content:"";position:absolute;inset:-40%;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.35) 50%,transparent 60%);animation:sheen 4.5s ease-in-out infinite}
 @keyframes sheen{0%,60%{transform:translateX(-60%)}100%{transform:translateX(60%)}}
@@ -76,7 +76,7 @@ header .wrap{display:flex;align-items:center;gap:12px;padding:12px max(16px,env(
 .crimp.top{top:-6px;transform:scaleY(-1)}
 .crimp.bot{bottom:-6px}
 .pack .tear{position:absolute;left:0;right:0;top:0;height:18%;z-index:2;transform-origin:4% 100%;
-  background:linear-gradient(115deg,#5d2a8a 0%,#2d1546 30%,#b8335a 58%,#ffb547 100%) 0 0/var(--pw) calc(var(--pw)*1.6);clip-path:var(--tearClip)}
+  background:var(--packbg) 0 0/var(--pw) calc(var(--pw)*1.6);clip-path:var(--tearClip)}
 .pack .tear::after{content:"";position:absolute;left:4%;right:4%;top:84%;border-top:2px dashed rgba(255,255,255,.35)}
 .pack .tear .crimp.top{top:-6px;transform:scaleY(-1)}
 .pack .peek{position:absolute;left:14%;right:14%;top:20%;height:66%;visibility:hidden}
@@ -91,6 +91,12 @@ header .wrap{display:flex;align-items:center;gap:12px;padding:12px max(16px,env(
 .pack .title small{display:block;font-size:.55em;color:var(--foil);letter-spacing:.04em}
 .pack .s01{position:absolute;bottom:12px;right:12px;font-family:var(--display);font-size:13px;background:rgba(0,0,0,.35);padding:1px 7px;border-radius:3px;z-index:2}
 /* pack opening: spin, grip, rip the top, cards peek out, pack drops away */
+.pack.hobby-look .title small{color:#fff}
+.pack-wrap:has(.hobby-look) .left-badge{display:none}
+.pack.hobby-look{--packbg:linear-gradient(115deg,#0e0b06 0%,#3a2c0c 32%,#ffc94a 58%,#7a5208 78%,#0e0b06 100%)}
+.hobby{display:grid;gap:2px;border:2px solid var(--foil);border-radius:14px;padding:10px 26px;background:linear-gradient(120deg,#3a2c0c,#1f1928 70%);text-align:center;box-shadow:0 0 22px rgba(255,201,74,.25)}
+.hobby b{font-family:var(--display);font-weight:400;font-size:22px;letter-spacing:.02em;text-transform:uppercase;color:var(--foil);line-height:1.1}
+.hobby span{font-size:13px;color:var(--muted)}
 .pack.spinning{animation:spin .95s cubic-bezier(.3,.1,.25,1) forwards}
 @keyframes spin{0%{transform:none}12%{transform:translateY(-12px) scale(1.05) rotateY(-14deg)}72%{transform:translateY(-14px) scale(1.06) rotateY(372deg) rotateZ(-2deg)}86%{transform:translateY(-14px) scale(1.06) rotateY(354deg)}100%{transform:translateY(-12px) scale(1.06) rotateY(360deg)}}
 .pack-wrap.gripping{animation:grip .3s linear}
@@ -314,15 +320,16 @@ img{max-width:100%}
           <div class="body"></div>
           <div class="tear"><div class="crimp top"></div></div>
           <div class="content">
-            <div class="series">SERIES 01 · DAILY PACK</div>
+            <div class="series" id="packSeries">SERIES 01 · DAILY PACK</div>
             <div class="medal"></div>
-            <div class="title"><small>3 cards</small>Darryl<br>Wednesdays</div>
+            <div class="title"><small id="packCount">3 cards</small>Darryl<br>Wednesdays</div>
           </div>
           <span class="s01">S01</span>
           <div class="crimp bot"></div>
         </div>
       </div>
       <button class="cta" id="openBtn" disabled>Loading…</button>
+      <button class="hobby" id="hobbyBtn" hidden><b>Open Hobby pack</b><span id="hobbyTxt"></span></button>
       <div class="sub" id="sub"></div>
     </div>
     <div class="strip"><div class="streak" id="streak"></div></div>
@@ -332,7 +339,7 @@ img{max-width:100%}
     <div class="refer" id="refer">
       <div class="refer-copy">
         <h2>Want more free packs?</h2>
-        <p>Send your link to friends. Each friend who joins with it starts with a bonus pack, and every 3 friends who join earn you one too.</p>
+        <p>Send your link to friends. Each friend who joins with it starts with a bonus pack, and every 3 friends who join earn you a 15-card Hobby pack.</p>
         <div class="refprog" id="refProg"></div>
       </div>
       <div class="refer-act">
@@ -481,6 +488,7 @@ function renderPacks(){
   $("leftBadge").textContent="×"+left;$("leftBadge").hidden=left===0;
   $("pack").setAttribute("aria-disabled",left===0?"true":"false");
   $("openBtn").disabled=left===0;
+  $("hobbyBtn").hidden=!S.hobby;$("hobbyTxt").textContent=`×${S.hobby} · ${S.hobbySize} cards · earned from invites`;
   $("openBtn").textContent=left===0?"No packs left":(S.used<S.allowance?"Open free pack":"Open bonus pack");
   if(left===0){$("sub").innerHTML=`Next free pack in<div class="timer" id="timer">--:--:--</div>`;startTimer()}
   else{$("sub").textContent=`${left} pack${left===1?"":"s"} left today`+(S.bonus?` (${S.bonus} bonus)`:"");stopTimer()}
@@ -492,7 +500,7 @@ function renderPacks(){
   $("refLink").value=link;
   const into2=S.refs%S.refsPerPack;let dots="";
   for(let i=1;i<=S.refsPerPack;i++)dots+=`<i class="${i<=into2?"on":""}">${i}</i>`;
-  $("refProg").innerHTML=`${dots}<span>${into2} of ${S.refsPerPack} toward your next pack · ${S.refs} friend${S.refs===1?"":"s"} joined</span>`;
+  $("refProg").innerHTML=`${dots}<span>${into2} of ${S.refsPerPack} toward a 15-card Hobby pack · ${S.refs} friend${S.refs===1?"":"s"} joined</span>`;
 }
 function startTimer(){
   stopTimer();
@@ -508,17 +516,20 @@ $("odds").innerHTML=[...PARS].reverse().map(p=>`<div class="odd" style="--pc:${p
 
 /* ---------- opening ---------- */
 let session=null, busy=false;
-async function beginOpen(){
-  if(busy||!S||S.packsLeft<=0)return;
-  busy=true;$("openBtn").disabled=true;
+async function beginOpen(kind="daily"){
+  const hobby=kind==="hobby";
+  if(busy||!S||(hobby?S.hobby<=0:S.packsLeft<=0))return;
+  busy=true;$("openBtn").disabled=true;$("hobbyBtn").disabled=true;
   const pack=$("pack"),wrap=pack.parentElement;
+  const look=on=>{pack.classList.toggle("hobby-look",on);$("packSeries").textContent=on?"SERIES 01 · HOBBY PACK":"SERIES 01 · DAILY PACK";$("packCount").textContent=on?`${S.hobbySize} cards`:"3 cards";if(on)pack.setAttribute("aria-disabled","false")};
+  if(hobby)look(true);
   const steps=[[0,()=>pack.classList.add("spinning")],[950,()=>wrap.classList.add("gripping")],[1250,()=>{wrap.classList.remove("gripping");pack.classList.add("ripped")}],
     [1650,()=>pack.classList.add("peeking")],[2250,()=>wrap.classList.add("dropping")]];
   const timers=reduced()?[]:steps.map(([t,f])=>setTimeout(f,t));
-  const resetPack=()=>{timers.forEach(clearTimeout);pack.classList.remove("spinning","ripped","peeking");wrap.classList.remove("gripping","dropping")};
+  const resetPack=()=>{look(false);timers.forEach(clearTimeout);pack.classList.remove("spinning","ripped","peeking");wrap.classList.remove("gripping","dropping")};
   const wait=new Promise(r=>setTimeout(r,reduced()?10:2700));
   try{
-    const [res]=await Promise.all([api("open",{}),wait]);
+    const [res]=await Promise.all([api("open",{kind}),wait]);
     session={pulls:res.pulls,i:0,revealed:new Set(),reward:res.reward};
     S=res.state;resetAt=Date.now()+S.secsLeft*1000;
     resetPack();
@@ -528,7 +539,7 @@ async function beginOpen(){
     await wait;resetPack();
     if(e.data&&e.data.state)setState(e.data.state);
     toast(e.message);
-  }finally{busy=false;if(S)$("openBtn").disabled=S.packsLeft===0}
+  }finally{busy=false;$("hobbyBtn").disabled=false;if(S){$("openBtn").disabled=S.packsLeft===0;renderPacks()}}
 }
 /* jagged tear line shared by the strip and the pack body so they interlock */
 (function(){const N=16,T=18,pts=[],tear=[],body=[];
@@ -551,14 +562,24 @@ function drawStage(anim){
       :`<span class="hint">Tap the card to flip it</span>`}</div>
     <div class="row">${allRev
       ?`<button class="cta" id="done">Continue</button><button class="ghost" id="toInv">View binder</button>`
-      :(isRev&&!last?`<button class="cta" id="nextBtn">Next card</button>`:"")}</div>`;
+      :(isRev&&!last?`<button class="cta" id="nextBtn">Next card</button>`:"")+(pulls.length>3?`<button class="ghost" id="revealAll">Reveal all</button>`:"")}</div>`;
   $("pv").onclick=()=>{session.i--;drawStage(false)};
   $("nx").onclick=()=>{session.i++;drawStage(true)};
   $("flipCard").onclick=()=>{if(!revealed.has(i))flip()};
   if($("nextBtn"))$("nextBtn").onclick=()=>{session.i++;drawStage(true)};
+  if($("revealAll"))$("revealAll").onclick=revealAll;
   if($("done"))$("done").onclick=()=>closeStage(false);
   if($("toInv"))$("toInv").onclick=()=>closeStage(true);
   ($("nextBtn")||$("done")||$("flipCard")).focus({preventScroll:true});
+}
+function revealAll(){
+  const {pulls}=session;pulls.forEach((_,k)=>session.revealed.add(k));
+  session.i=pulls.length-1;drawStage(true); // best card is sorted last
+  const best=pulls[session.i];
+  if(best.par==="gold")goldFlash();else if(best.par==="one")goldFlash("1/1 AUTO","#ff6fd8");
+  else if(RANK[best.par]>=RANK.blue)confetti(PAR[best.par].color,170);
+  const hits=pulls.filter(x=>x.par!=="base").length;
+  toast(hits?`${hits} numbered card${hits===1?"":"s"} in this pack. Use ‹ to see them all.`:"All base this time. Use ‹ to see them all.");
 }
 function flip(){
   const i=session.i,pull=session.pulls[i];
@@ -700,7 +721,7 @@ function show(v){
 }
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>show(b.dataset.view));
 $("feedRefresh").onclick=loadFeed;$("boardRefresh").onclick=loadBoard;
-$("openBtn").onclick=beginOpen;$("pack").onclick=beginOpen;
+$("openBtn").onclick=()=>beginOpen();$("pack").onclick=()=>beginOpen();$("hobbyBtn").onclick=()=>beginOpen("hobby");
 $("pack").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();beginOpen()}};
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("modal").hidden)closeDetail()});
 addEventListener("resize",()=>{if(view==="inv")renderInv()});

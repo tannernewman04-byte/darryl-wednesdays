@@ -1,0 +1,3 @@
+# Only api/router.js is deployed as a function; the other api files are kept for reference.
+/api/*
+!/api/router.js

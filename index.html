@@ -75,17 +75,36 @@ header .wrap{display:flex;align-items:center;gap:12px;padding:12px max(16px,env(
   mask:conic-gradient(from -45deg at bottom,#000 90deg,transparent 0) 0 0/12px 100%}
 .crimp.top{top:-6px;transform:scaleY(-1)}
 .crimp.bot{bottom:-6px}
-.pack .tear{position:absolute;left:0;right:0;top:0;height:16%;z-index:2;border-bottom:2px dashed rgba(255,255,255,.35);transform-origin:12% 100%}
-.pack .content{position:absolute;inset:0;display:grid;grid-template-rows:auto 1fr auto;justify-items:center;padding:22% 10% 9%;text-align:center;z-index:1}
+.pack .tear{position:absolute;left:0;right:0;top:0;height:18%;z-index:2;transform-origin:4% 100%;
+  background:linear-gradient(115deg,#5d2a8a 0%,#2d1546 30%,#b8335a 58%,#ffb547 100%) 0 0/var(--pw) calc(var(--pw)*1.6);clip-path:var(--tearClip)}
+.pack .tear::after{content:"";position:absolute;left:4%;right:4%;top:84%;border-top:2px dashed rgba(255,255,255,.35)}
+.pack .tear .crimp.top{top:-6px;transform:scaleY(-1)}
+.pack .peek{position:absolute;left:14%;right:14%;top:20%;height:66%;visibility:hidden}
+.pack .peek i{position:absolute;inset:0;border-radius:8px;border:3px solid var(--foil);background:radial-gradient(circle at 50% 40%,#3a1d5c,#140a22 70%);box-shadow:0 4px 10px rgba(0,0,0,.4)}
+.pack .peek i::after{content:"D";position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-size:42px;color:var(--foil);opacity:.8}
+.pack .peek i:nth-child(1){transform:rotate(-7deg) translateX(-8%)}
+.pack .peek i:nth-child(3){transform:rotate(7deg) translateX(8%)}
+.pack .content{position:absolute;inset:0;display:grid;grid-template-rows:auto 1fr auto;justify-items:center;padding:33% 10% 9%;text-align:center;z-index:1}
 .pack .series{font-family:var(--cond);font-weight:700;letter-spacing:.2em;font-size:11px;color:rgba(255,255,255,.85)}
 .pack .medal{align-self:center;width:62%;aspect-ratio:1;border-radius:50%;background:url(/img/d2.jpg) center 22%/cover;border:4px solid var(--foil);box-shadow:0 0 0 3px rgba(0,0,0,.25),0 10px 24px rgba(0,0,0,.4)}
 .pack .title{font-family:var(--display);font-size:clamp(22px,6.6vw,31px);line-height:.95;text-transform:uppercase;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.35)}
 .pack .title small{display:block;font-size:.55em;color:var(--foil);letter-spacing:.04em}
 .pack .s01{position:absolute;bottom:12px;right:12px;font-family:var(--display);font-size:13px;background:rgba(0,0,0,.35);padding:1px 7px;border-radius:3px;z-index:2}
-.pack.tearing .tear{animation:rip .55s cubic-bezier(.5,0,.75,0) forwards;background:inherit}
-@keyframes rip{to{transform:translate(40px,-80px) rotate(-28deg);opacity:0}}
-.pack.dropping{animation:drop .5s .45s cubic-bezier(.5,0,1,.5) forwards}
-@keyframes drop{to{transform:translateY(120%) rotate(6deg);opacity:0}}
+/* pack opening: spin, grip, rip the top, cards peek out, pack drops away */
+.pack.spinning{animation:spin .95s cubic-bezier(.3,.1,.25,1) forwards}
+@keyframes spin{0%{transform:none}12%{transform:translateY(-12px) scale(1.05) rotateY(-14deg)}72%{transform:translateY(-14px) scale(1.06) rotateY(372deg) rotateZ(-2deg)}86%{transform:translateY(-14px) scale(1.06) rotateY(354deg)}100%{transform:translateY(-12px) scale(1.06) rotateY(360deg)}}
+.pack-wrap.gripping{animation:grip .3s linear}
+@keyframes grip{0%,100%{transform:none}20%{transform:translateX(-3px) rotate(-1.5deg)}40%{transform:translateX(3px) rotate(1.2deg)}60%{transform:translateX(-2px) rotate(-1deg)}80%{transform:translateX(2px) rotate(.6deg)}}
+.pack.ripped .body,.pack.ripped .content{clip-path:var(--bodyClip)}
+.pack.ripped .tear{animation:rip .7s cubic-bezier(.45,0,.2,1) forwards}
+@keyframes rip{0%{transform:none}35%{transform:translate(10px,-6px) rotate(-9deg)}100%{transform:translate(150px,-120px) rotate(-55deg);opacity:0}}
+.pack.peeking .peek{visibility:visible}
+.pack.peeking .peek i{animation:peek .55s cubic-bezier(.2,.9,.3,1.2) forwards}
+.pack.peeking .peek i:nth-child(2){animation-delay:.06s}
+.pack.peeking .peek i:nth-child(3){animation-delay:.12s}
+@keyframes peek{to{translate:0 -34%}}
+.pack-wrap.dropping{animation:drop .45s cubic-bezier(.5,0,1,.5) forwards}
+@keyframes drop{to{transform:translateY(60%) scale(.92);opacity:0}}
 
 .cta{font-family:var(--cond);font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:18px;background:var(--foil);color:var(--ink);padding:14px 34px;border-radius:999px;box-shadow:0 6px 0 var(--foil2);transition:transform .1s,box-shadow .1s}
 .cta:active{transform:translateY(4px);box-shadow:0 2px 0 var(--foil2)}
@@ -281,9 +300,9 @@ img{max-width:100%}
       <div class="pack-wrap">
         <span class="left-badge" id="leftBadge" hidden>×1</span>
         <div class="pack" id="pack" role="button" tabindex="0" aria-label="Open a Darryl pack" aria-disabled="true">
-          <div class="crimp top"></div>
+          <div class="peek" aria-hidden="true"><i></i><i></i><i></i></div>
           <div class="body"></div>
-          <div class="tear"></div>
+          <div class="tear"><div class="crimp top"></div></div>
           <div class="content">
             <div class="series">SERIES 01 · DAILY PACK</div>
             <div class="medal"></div>
@@ -465,21 +484,32 @@ let session=null, busy=false;
 async function beginOpen(){
   if(busy||!S||S.packsLeft<=0)return;
   busy=true;$("openBtn").disabled=true;
-  const pack=$("pack");pack.classList.add("tearing","dropping");
-  const wait=new Promise(r=>setTimeout(r,reduced()?10:950));
+  const pack=$("pack"),wrap=pack.parentElement;
+  const steps=[[0,()=>pack.classList.add("spinning")],[950,()=>wrap.classList.add("gripping")],[1250,()=>{wrap.classList.remove("gripping");pack.classList.add("ripped")}],
+    [1650,()=>pack.classList.add("peeking")],[2250,()=>wrap.classList.add("dropping")]];
+  const timers=reduced()?[]:steps.map(([t,f])=>setTimeout(f,t));
+  const resetPack=()=>{timers.forEach(clearTimeout);pack.classList.remove("spinning","ripped","peeking");wrap.classList.remove("gripping","dropping")};
+  const wait=new Promise(r=>setTimeout(r,reduced()?10:2700));
   try{
     const [res]=await Promise.all([api("open",{}),wait]);
     session={pulls:res.pulls,i:0,revealed:new Set(),reward:res.reward};
     S=res.state;resetAt=Date.now()+S.secsLeft*1000;
-    pack.classList.remove("tearing","dropping");
+    resetPack();
     $("overlay").hidden=false;document.body.style.overflow="hidden";drawStage(true);
     renderAll();
   }catch(e){
-    await wait;pack.classList.remove("tearing","dropping");
+    await wait;resetPack();
     if(e.data&&e.data.state)setState(e.data.state);
     toast(e.message);
   }finally{busy=false;if(S)$("openBtn").disabled=S.packsLeft===0}
 }
+/* jagged tear line shared by the strip and the pack body so they interlock */
+(function(){const N=16,T=18,pts=[],tear=[],body=[];
+  for(let i=0;i<=N;i++){const x=i/N*100,y=i%2?84:100;pts.push([x,y])}
+  tear.push("0 -12px","100% -12px");for(const [x,y] of [...pts].reverse())tear.push(`${x}% ${y}%`);
+  body.push("0 -12px","0 0");for(const [x,y] of pts)body.push(`${x}% ${(y*T/100).toFixed(2)}%`);body.push("100% 100%","0 100%");
+  $("pack").style.setProperty("--tearClip",`polygon(${tear.join(",")})`);
+  $("pack").style.setProperty("--bodyClip",`polygon(${["0 "+(T)+"%"].concat(body.slice(2)).join(",")})`);})();
 function drawStage(anim){
   const {pulls,i,revealed}=session,pull=pulls[i],isRev=revealed.has(i);
   const p=PAR[pull.par],c=cardOf(pull.card);

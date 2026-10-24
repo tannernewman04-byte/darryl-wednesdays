@@ -4,6 +4,7 @@ import { checkCode, issueCode, normEmail } from "../lib/email.js";
 import { auth, cleanName, createPlayer, getPlayer, openPack, readBody, rid, savePlayer, send, stateFor } from "../lib/game.js";
 import { checkPw, hashPw, pwProblem } from "../lib/password.js";
 import { store } from "../lib/store.js";
+import { addSighting, isAdmin, listPending, listSightings, photoBytes, reviewSighting } from "../lib/sightings.js";
 
 // ---- /api/code ----
 async function route_code(req, res) {
@@ -182,7 +183,47 @@ async function route_verify(req, res) {
   send(res, 200, { token: out.token, invitedBy: out.invitedBy, state: await stateFor(out.p) });
 }
 
-const routes = { code: route_code, feed: route_feed, health: route_health, invite: route_invite, join: route_join, leaderboard: route_leaderboard, login: route_login, lookup: route_lookup, me: route_me, open: route_open, password: route_password, redeem: route_redeem, verify: route_verify };
+// ---- /api/spot ---- add a Darryl Sighting card (photo + location)
+async function route_spot(req, res) {
+  if (req.method !== "POST") return send(res, 405, { error: "Use POST" });
+  const p = await auth(req);
+  if (!p) return send(res, 401, { error: "Not signed in" });
+  if (!p.email) return send(res, 403, { error: "Confirm your email first" });
+  const out = await addSighting(p, await readBody(req));
+  if (out.error) return send(res, out.status, { error: out.error });
+  send(res, 200, { card: out.card, state: await stateFor(p) });
+}
+
+// ---- /api/review ---- the owner approves or rejects sightings
+async function route_review(req, res) {
+  const p = await auth(req);
+  if (!p) return send(res, 401, { error: "Not signed in" });
+  if (!isAdmin(p)) return send(res, 403, { error: "Only the site owner can review sightings" });
+  if (req.method === "GET") return send(res, 200, { pending: await listPending() });
+  const body = await readBody(req);
+  const out = await reviewSighting(Number(body.id), body.action === "approve");
+  if (out.error) return send(res, out.status, { error: out.error });
+  send(res, 200, { ...out, state: await stateFor(p) });
+}
+
+// ---- /api/cards ---- the Darryl Sighting cards (no photos, just details)
+async function route_cards(req, res) {
+  const items = (await listSightings()).map(({ byId, ...rest }) => rest);
+  send(res, 200, { sightings: items });
+}
+
+// ---- /api/photo?id=101 ---- a sighting photo
+async function route_photo(req, res) {
+  const id = new URL(req.url, "http://x").searchParams.get("id");
+  const buf = await photoBytes(id);
+  if (!buf) { res.statusCode = 404; return res.end(); }
+  res.statusCode = 200;
+  res.setHeader("content-type", "image/jpeg");
+  res.setHeader("cache-control", "public, max-age=31536000, immutable");
+  res.end(buf);
+}
+
+const routes = { code: route_code, feed: route_feed, health: route_health, invite: route_invite, join: route_join, leaderboard: route_leaderboard, login: route_login, lookup: route_lookup, me: route_me, open: route_open, password: route_password, redeem: route_redeem, verify: route_verify, spot: route_spot, cards: route_cards, photo: route_photo, review: route_review };
 export default async function handler(req, res) {
   const u = new URL(req.url, "http://x");
   const name = (req.query && req.query.route) || u.searchParams.get("route") || u.pathname.split("/").pop();

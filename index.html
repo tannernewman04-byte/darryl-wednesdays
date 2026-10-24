@@ -160,6 +160,8 @@ header .wrap{display:flex;align-items:center;gap:12px;padding:12px max(16px,env(
 .plate{position:absolute;left:calc(var(--w)*.08);right:calc(var(--w)*.08);bottom:calc(var(--w)*.075);z-index:2;display:grid;gap:0}
 .plate .no{font-family:var(--cond);font-weight:700;letter-spacing:.14em;font-size:calc(var(--w)*.05);color:var(--chip)}
 .plate .nm{font-family:var(--display);font-size:calc(var(--w)*.105);line-height:1;text-transform:uppercase;color:#fff;overflow-wrap:anywhere}
+.card.sight .auto{bottom:calc(var(--w)*.47)}
+.plate .loc{font-family:var(--cond);font-weight:600;letter-spacing:.04em;font-size:calc(var(--w)*.048);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 3px rgba(0,0,0,.7)}
 .plate .pl{font-family:var(--cond);font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:calc(var(--w)*.045);color:rgba(255,255,255,.75)}
 .card.numbered .topline .st{display:none}
 .serial{position:absolute;right:calc(var(--w)*.07);top:calc(var(--w)*.065);z-index:3;font-family:var(--display);font-size:calc(var(--w)*.075);line-height:1;background:var(--frame);color:var(--chipfg);padding:calc(var(--w)*.02) calc(var(--w)*.03);border-radius:calc(var(--w)*.015);box-shadow:0 2px 6px rgba(0,0,0,.4);font-variant-numeric:tabular-nums}
@@ -296,6 +298,21 @@ img{max-width:100%}
 .join .cta{justify-self:stretch}
 .join .err{color:#ff8a98}
 .jstep{display:grid;gap:8px}
+.spotcta{display:grid;justify-items:center;gap:6px;margin:18px auto 0;text-align:center;max-width:420px}
+.spotbtn{border-color:var(--foil);color:var(--foil);font-size:16px;padding:12px 22px}
+.spotcta small{color:var(--muted);font-size:13px}
+.photopick{display:grid;place-items:center;aspect-ratio:3/4;width:min(220px,60vw);justify-self:center;border:2px dashed var(--line);border-radius:14px;overflow:hidden;cursor:pointer;color:var(--muted);font-weight:600;text-transform:none!important;letter-spacing:0!important;font-size:15px!important;font-family:var(--body)!important}
+.photopick img{width:100%;height:100%;object-fit:cover}
+#spotForm .hint{margin:0;font-size:13px;color:var(--muted)}
+#spotForm .linkbtn{justify-self:center}
+.reviewbar{display:block;margin:12px auto 0;background:var(--red);color:#fff;font-weight:700;border-radius:999px;padding:9px 18px;font-size:14px}
+.join.review{max-width:520px}
+.rv{display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:start;padding:12px 0;border-top:1px solid var(--line)}
+.rv img{width:110px;aspect-ratio:3/4;object-fit:cover;border-radius:10px;cursor:zoom-in}
+.rv b{display:block;font-size:15px}
+.rv span{display:block;color:var(--muted);font-size:13px}
+.rv .row{justify-content:flex-start;margin-top:8px}
+.rv .rej{border-color:var(--red);color:#ff8a98}
 .codebox{display:grid;justify-items:center;gap:8px;margin:16px auto 0;max-width:380px;text-align:center}
 .codebox label{font-family:var(--cond);font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:13px;color:var(--muted)}
 .codebox .row{width:100%;flex-wrap:nowrap}
@@ -339,7 +356,7 @@ img{max-width:100%}
           <div class="content">
             <div class="series" id="packSeries">SERIES 01 · FREE PACK</div>
             <div class="medal"></div>
-            <div class="title"><small id="packCount">3 cards</small>Darryl<br>Wednesdays</div>
+            <div class="title"><small id="packCount">5 cards</small>Darryl<br>Wednesdays</div>
           </div>
           <span class="s01">S01</span>
           <div class="crimp bot"></div>
@@ -351,6 +368,8 @@ img{max-width:100%}
       <div class="sub" id="sub"></div>
     </div>
     <div class="strip"><div class="streak" id="streak"></div></div>
+    <div class="spotcta"><button class="ghost spotbtn" id="spotBtn" type="button">📸 Spotted Darryl? Add a sighting</button><small id="spotNote">Every approved sighting becomes a card anyone can pull, and you get a free 5-card pack</small></div>
+    <button class="reviewbar" id="reviewBtn" type="button" hidden></button>
     <form class="codebox" id="codeBox" novalidate>
       <label for="packCodeIn">Have a pack code?</label>
       <div class="row"><input id="packCodeIn" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Enter code"><button class="ghost" id="codeBtn" type="submit">Redeem</button></div>
@@ -441,6 +460,28 @@ img{max-width:100%}
     <p class="err" id="joinErr" hidden></p>
   </form>
 </div>
+<div class="overlay" id="spotOv" hidden>
+  <form class="join" id="spotForm" novalidate>
+    <h1>Darryl sighting</h1>
+    <p>Snap Darryl in the wild. Once it's approved, your photo becomes a "Darryl Sighting" card with every parallel, showing where he was spotted, and you get a free 5-card pack.</p>
+    <label class="photopick" for="spotFile"><img id="spotPrev" alt="" hidden><span id="spotPick">Tap to take a photo</span></label>
+    <input id="spotFile" type="file" accept="image/*" capture="environment" hidden>
+    <label for="spotPlace">Location</label>
+    <input id="spotPlace" maxlength="60" placeholder="Finding your location…">
+    <p class="hint" id="spotGps"></p>
+    <button class="cta" id="spotSubmit" type="submit">Add sighting</button>
+    <button class="linkbtn" type="button" id="spotCancel">Cancel</button>
+    <p class="err" id="spotErr" hidden></p>
+  </form>
+</div>
+<div class="overlay" id="reviewOv" hidden>
+  <div class="join review">
+    <h1>Review sightings</h1>
+    <p id="reviewIntro"></p>
+    <div id="reviewList"></div>
+    <button class="ghost" type="button" id="reviewClose">Done</button>
+  </div>
+</div>
 <div class="overlay" id="overlay" hidden><div class="stage" id="stage"></div></div>
 <div class="modal" id="modal" hidden></div>
 <canvas id="confetti" hidden></canvas>
@@ -458,6 +499,17 @@ const CARDS=[
   {n:26,name:"Dorm Duo"},{n:27,name:"Nap Time"},{n:28,name:"Cancun Dig"},{n:29,name:"Uber Ride"},{n:30,name:"Bar Stool"},{n:31,name:"Point Blank"},{n:32,name:"Blue Hour"},{n:33,name:"Camel Selfie"},{n:34,name:"Costume Party"},{n:35,name:"Happy Dad"},{n:36,name:"Shoulder Ride"},{n:37,name:"Under the Bed"},{n:38,name:"Big Feelings"},{n:39,name:"Pinned"}
 ].map(c=>({...c,img:`/img/d${c.n}.jpg`}));
 const POOL=CARDS.filter(c=>!c.goldOnly);
+/* Darryl Sightings: player photos that join the card list */
+async function loadSightings(){
+  try{
+    const {sightings}=await api("cards");let added=false;
+    for(const x of sightings){if(CARDS.some(c=>c.n===x.n))continue;
+      CARDS.push({n:x.n,name:"Darryl Sighting",img:`/api/photo?id=${x.n}`,sighting:x});added=true}
+    if(added){POOL.length=0;POOL.push(...CARDS.filter(c=>!c.goldOnly));setFoot();if(S)renderAll()}
+  }catch(e){}
+}
+const placeLine=x=>`${x.place}`;
+const spotDate=t=>new Date(t).toLocaleString(undefined,{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
 const PARS=[
   {k:"gold",label:"Gold",print:1,odds:"1 in 4,000",color:"var(--foil)"},
   {k:"one",label:"1/1 Auto",print:1,odds:"1 in 2,000",color:"#ff6fd8"},
@@ -496,17 +548,23 @@ async function api(path,body){
 /* ---------- state ---------- */
 let S=null, resetAt=0, tick=null, view="packs";
 function setState(s){S=s;resetAt=Date.now()+s.secsLeft*1000;renderAll()}
-function renderAll(){if(S){const need=!!S.email&&!S.hasPassword;$("pwBox").hidden=!need;$("pwNag").hidden=!need;$("pwBoxUser").value=S.email||""}if(S&&S.email)$("deviceTxt").textContent=`Signed in as ${S.email}. On your other phone or computer, open the site and sign in with the same email.`;renderPacks();$("invCount").textContent=S?S.inv.length:0;if(view==="inv")renderInv()}
+function renderSpot(){
+  if(!S)return;
+  $("spotNote").textContent=S.mySightingsWaiting?`${S.mySightingsWaiting} of your sighting${S.mySightingsWaiting===1?" is":"s are"} waiting for approval`:"Every approved sighting becomes a card anyone can pull, and you get a free 5-card pack";
+  $("reviewBtn").hidden=!(S.isAdmin&&S.sightingsToReview);
+  $("reviewBtn").textContent=`${S.sightingsToReview} sighting${S.sightingsToReview===1?"":"s"} to review`;
+}
+function renderAll(){renderSpot();if(S){const need=!!S.email&&!S.hasPassword;$("pwBox").hidden=!need;$("pwNag").hidden=!need;$("pwBoxUser").value=S.email||""}if(S&&S.email)$("deviceTxt").textContent=`Signed in as ${S.email}. On your other phone or computer, open the site and sign in with the same email.`;renderPacks();$("invCount").textContent=S?S.inv.length:0;if(view==="inv")renderInv()}
 
 /* ---------- card markup ---------- */
 function cardHTML(pull,{facedown=false,cls=""}={}){
   const c=cardOf(pull.card),p=PAR[pull.par],numbered=pull.par!=="base";
-  return `<div class="card p-${p.style||p.k} ${p.auto?"is-auto":""} ${numbered?"numbered":""} ${facedown?"facedown":""} ${cls}">
+  return `<div class="card p-${p.style||p.k} ${p.auto?"is-auto":""} ${c.sighting?"sight":""} ${numbered?"numbered":""} ${facedown?"facedown":""} ${cls}">
     <div class="inner">
       <div class="face front"><div class="frame">
         <div class="photo" style="background-image:url(${c.img});${c.pos?`background-position:${c.pos}`:""}"></div>
-        <div class="topline"><span class="wm">DARRYL</span><span class="st">S01</span></div>
-        <div class="plate"><span class="no">#${pad(c.n)} · ${p.label.toUpperCase()}</span><span class="nm">${esc(c.name)}</span>${numbered?"":`<span class="pl">Series 01 base</span>`}</div>
+        <div class="topline"><span class="wm">DARRYL</span><span class="st">${c.sighting?"SPOTTED":"S01"}</span></div>
+        <div class="plate"><span class="no">#${pad(c.n)} · ${p.label.toUpperCase()}</span><span class="nm">${esc(c.name)}</span>${c.sighting?`<span class="loc">📍 ${esc(placeLine(c.sighting))}</span>`:numbered?"":`<span class="pl">Series 01 base</span>`}</div>
         ${numbered?`<div class="serial">${serialText(pull.par,pull.serial)}</div>`:""}
         ${p.auto||pull.par==="one"||pull.par==="gold"?`<div class="auto"><img src="/img/sig.png" alt="Darryl Weinberg autograph"><small>Certified autograph</small></div>`:""}
         <div class="shine"></div>
@@ -559,7 +617,7 @@ async function beginOpen(kind="daily"){
   if(busy||!S||(SP?SP.have<=0:S.packsLeft<=0))return;
   busy=true;$("openBtn").disabled=true;$("hobbyBtn").disabled=true;$("darrylBtn").disabled=true;
   const pack=$("pack"),wrap=pack.parentElement;
-  const look=on=>{pack.classList.remove("hobby-look","darryl-look");if(on)pack.classList.add(SP.cls);$("packSeries").textContent=on?`SERIES 01 · ${SP.name}`:"SERIES 01 · FREE PACK";$("packCount").textContent=on?`${SP.size} cards`:"3 cards";if(on)pack.setAttribute("aria-disabled","false")};
+  const look=on=>{pack.classList.remove("hobby-look","darryl-look");if(on)pack.classList.add(SP.cls);$("packSeries").textContent=on?`SERIES 01 · ${SP.name}`:"SERIES 01 · FREE PACK";$("packCount").textContent=on?`${SP.size} cards`:"5 cards";if(on)pack.setAttribute("aria-disabled","false")};
   if(SP)look(true);
   const steps=[[0,()=>pack.classList.add("spinning")],[950,()=>wrap.classList.add("gripping")],[1250,()=>{wrap.classList.remove("gripping");pack.classList.add("ripped")}],
     [1650,()=>pack.classList.add("peeking")],[2250,()=>wrap.classList.add("dropping")]];
@@ -595,7 +653,7 @@ function drawStage(anim){
     <button id="flipCard" aria-label="${isRev?"Card":"Tap to reveal"}" style="border-radius:14px">${cardHTML(pull,{facedown:!isRev,cls:anim?"appear":""})}</button>
     <div class="reveal">${isRev
       ?`<span class="tier" style="--pc:${p.color}">${p.label}${p.print?(p.print===1?" 1/1":" /"+p.print):""}</span>
-        <span class="big">#${pad(c.n)} ${esc(c.name)}</span>
+        <span class="big">#${pad(c.n)} ${esc(c.name)}</span>${c.sighting?`<span class="meta">Spotted by ${esc(c.sighting.by)} · ${spotDate(c.sighting.at)} · <a href="https://www.openstreetmap.org/?mlat=${c.sighting.lat}&mlon=${c.sighting.lon}#map=17/${c.sighting.lat}/${c.sighting.lon}" target="_blank" rel="noopener">map</a></span>`:""}
         <span class="meta">${p.print?(p.print===1?"The only one in existence":"Serial "+pad(pull.serial)+" of "+p.print)+" · "+p.odds+" pulls":"Base card · "+p.odds+" pulls"}</span>`
       :`<span class="hint">Tap the card to flip it</span>`}</div>
     <div class="row">${allRev
@@ -697,7 +755,7 @@ function openDetail(cardN,selId){
       <div id="spinWrap" class="spin">${cardHTML(sel)}</div>
       <div class="hint">Drag to turn it round</div>
       <div class="reveal"><span class="tier" style="--pc:${p.color}">${p.label}${p.print?(p.print===1?" 1/1":" /"+p.print):""}</span>
-        <span class="big">#${pad(c.n)} ${esc(c.name)}</span>
+        <span class="big">#${pad(c.n)} ${esc(c.name)}</span>${c.sighting?`<span class="meta">Spotted by ${esc(c.sighting.by)} · ${spotDate(c.sighting.at)} · <a href="https://www.openstreetmap.org/?mlat=${c.sighting.lat}&mlon=${c.sighting.lon}#map=17/${c.sighting.lat}/${c.sighting.lon}" target="_blank" rel="noopener">map</a></span>`:""}
         <span class="meta">Pulled ${mine.length} time${mine.length===1?"":"s"} · ${mine.length-baseCount} numbered</span></div>
       <div class="versions">${chips}</div>
       <button class="ghost" id="mDone">Done</button>
@@ -864,6 +922,77 @@ $("pwBox").onsubmit=async e=>{
   catch(err){$("pwBoxErr").textContent=err.message;$("pwBoxErr").hidden=false}
   finally{$("pwBoxBtn").disabled=false}
 };
+/* ---------- Darryl sightings ---------- */
+const SP0={image:null,lat:null,lon:null};let SPOT={...SP0};
+function spotErr(m){$("spotErr").textContent=m||"";$("spotErr").hidden=!m}
+function openSpot(){
+  SPOT={...SP0};spotErr("");$("spotPrev").hidden=true;$("spotPick").hidden=false;$("spotFile").value="";$("spotPlace").value="";
+  $("spotGps").textContent="Getting your location…";$("spotOv").hidden=false;document.body.style.overflow="hidden";
+  if(!navigator.geolocation){$("spotGps").textContent="This browser can't share location.";return}
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    SPOT.lat=pos.coords.latitude;SPOT.lon=pos.coords.longitude;
+    $("spotGps").textContent=`📍 ${SPOT.lat.toFixed(5)}, ${SPOT.lon.toFixed(5)} (within ${Math.round(pos.coords.accuracy)} m)`;
+    try{
+      const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=17&lat=${SPOT.lat}&lon=${SPOT.lon}`).then(r=>r.json());
+      const a=r.address||{};const spot=a.amenity||a.shop||a.building||a.road||a.neighbourhood||a.suburb||"";
+      const town=a.city||a.town||a.village||a.municipality||"";
+      if(!$("spotPlace").value)$("spotPlace").value=[spot,town].filter(Boolean).join(", ").slice(0,60);
+    }catch(e){}
+    if(!$("spotPlace").value)$("spotPlace").placeholder="Name the spot (e.g. UCC, Western)";
+  },()=>{$("spotGps").textContent="Location is off. Allow location for this site to add a sighting.";},{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+}
+function closeSpot(){$("spotOv").hidden=true;document.body.style.overflow=""}
+$("spotBtn").onclick=()=>{if(!S||!token){showJoin();return}openSpot()};
+$("spotCancel").onclick=closeSpot;
+$("spotFile").onchange=async()=>{
+  const f=$("spotFile").files[0];if(!f)return;spotErr("");
+  try{
+    const url=URL.createObjectURL(f);const img=new Image();img.src=url;await img.decode();
+    const W=600,H=800,cv=document.createElement("canvas");cv.width=W;cv.height=H;
+    const sc=Math.max(W/img.naturalWidth,H/img.naturalHeight),w=img.naturalWidth*sc,h=img.naturalHeight*sc;
+    cv.getContext("2d").drawImage(img,(W-w)/2,(H-h)/2,w,h);URL.revokeObjectURL(url);
+    let q=.82,data=cv.toDataURL("image/jpeg",q);while(data.length>440000&&q>.4){q-=.12;data=cv.toDataURL("image/jpeg",q)}
+    SPOT.image=data;$("spotPrev").src=data;$("spotPrev").hidden=false;$("spotPick").hidden=true;
+  }catch(e){spotErr("Couldn't read that photo. Try another one.")}
+};
+$("spotForm").onsubmit=async e=>{
+  e.preventDefault();spotErr("");
+  if(!SPOT.image)return spotErr("Take a photo of Darryl first");
+  if(SPOT.lat==null)return spotErr("Allow location for this site so the card can show where he was");
+  $("spotSubmit").disabled=true;
+  try{
+    const res=await api("spot",{image:SPOT.image,lat:SPOT.lat,lon:SPOT.lon,place:$("spotPlace").value.trim()});
+    closeSpot();await loadSightings();setState(res.state);
+    toast("Sighting sent for approval. You'll get your 5-card pack once it's approved.");
+  }catch(err){spotErr(err.message)}
+  finally{$("spotSubmit").disabled=false}
+};
+/* ---------- owner review ---------- */
+async function openReview(){
+  $("reviewOv").hidden=false;document.body.style.overflow="hidden";
+  $("reviewIntro").textContent="Loading…";$("reviewList").innerHTML="";
+  try{
+    const {pending}=await api("review");
+    $("reviewIntro").textContent=pending.length?"Approve to make it a card and give the spotter a 5-card pack. Reject deletes the photo.":"Nothing waiting right now.";
+    $("reviewList").innerHTML=pending.map(x=>`<div class="rv" id="rv${x.n}"><img src="${x.image}" alt="Sighting photo from ${esc(x.by)}">
+      <div><b>📍 ${esc(x.place)}</b><span>From ${esc(x.by)} · ${spotDate(x.at)}</span>
+      <span><a href="https://www.openstreetmap.org/?mlat=${x.lat}&mlon=${x.lon}#map=17/${x.lat}/${x.lon}" target="_blank" rel="noopener">View on map</a></span>
+      <div class="row"><button class="cta small" data-n="${x.n}" data-a="approve">Approve</button><button class="ghost rej" data-n="${x.n}" data-a="reject">Reject</button></div></div></div>`).join("");
+    $("reviewList").querySelectorAll("img").forEach(i=>i.onclick=()=>window.open(i.src,"_blank"));
+    $("reviewList").querySelectorAll("button[data-n]").forEach(b=>b.onclick=async()=>{
+      const n=+b.dataset.n,a=b.dataset.a;
+      if(a==="reject"&&!confirm("Reject this sighting? The photo will be deleted."))return;
+      b.parentElement.querySelectorAll("button").forEach(x=>x.disabled=true);
+      try{const res=await api("review",{id:n,action:a});setState(res.state);$("rv"+n).remove();
+        toast(a==="approve"?`Approved: Darryl Sighting #${n} is now a card`:"Sighting rejected");
+        if(a==="approve")loadSightings();
+        if(!$("reviewList").children.length)$("reviewIntro").textContent="All caught up.";}
+      catch(err){toast(err.message);b.parentElement.querySelectorAll("button").forEach(x=>x.disabled=false)}
+    });
+  }catch(err){$("reviewIntro").textContent=err.message}
+}
+$("reviewBtn").onclick=openReview;
+$("reviewClose").onclick=()=>{$("reviewOv").hidden=true;document.body.style.overflow=""};
 $("codeBox").onsubmit=async e=>{
   e.preventDefault();$("codeErr").hidden=true;$("codeBtn").disabled=true;
   try{const res=await api("redeem",{code:$("packCodeIn").value});$("packCodeIn").value="";setState(res.state);toast(res.message)}
@@ -878,7 +1007,8 @@ async function refresh(){
     $("netWarn").textContent="Can't reach the server right now. Check your connection and reload.";$("netWarn").hidden=false;
   }
 }
-$("foot").textContent=`Series 01 · ${POOL.length} base cards · 4 numbered parallels, each with a signed Auto version · ${POOL.length} signed 1/1 Autos · one Gold 1/1`;
+function setFoot(){$("foot").textContent=`Series 01 · ${POOL.length} base cards · 4 numbered parallels, each with a signed Auto version · ${POOL.length} signed 1/1 Autos · one Gold 1/1`}
+setFoot();loadSightings();
 api("health").then(h=>{$("dbWarn").hidden=h.db!=="memory"}).catch(()=>{});
 const startView=location.hash.slice(1);
 if(token)refresh();else showJoin();

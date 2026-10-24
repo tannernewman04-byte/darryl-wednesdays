@@ -2,7 +2,7 @@
   "cleanUrls": true,
   "headers": [
     {
-      "source": "/api/(.*)",
+      "source": "/api/((?!photo).*)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -13,7 +13,7 @@
   ],
   "rewrites": [
     {
-      "source": "/api/:route(code|feed|health|invite|join|leaderboard|login|lookup|me|open|password|redeem|verify)",
+      "source": "/api/:route(code|feed|health|invite|join|leaderboard|login|lookup|me|open|password|redeem|verify|spot|cards|photo|review)",
       "destination": "/api/router?route=:route"
     }
   ]
